@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประมาณการสิทธิและสวัสดิการกำลังพล ทบ.</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons (e.g., loading spinner) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom Minecraft-themed styles */
+        body {
+            font-family: 'Inter', sans-serif; /* Fallback to sans-serif if Inter is not loaded */
+            @apply bg-stone-800 text-stone-100; /* Dark earth background */
+        }
+        .minecraft-container {
+            @apply bg-stone-700 border-4 border-stone-900 shadow-xl p-6 md:p-8 rounded-none; /* Blocky container */
+        }
+        .minecraft-input, .minecraft-textarea, .minecraft-select {
+            @apply bg-stone-900 text-stone-100 border-2 border-stone-600 focus:border-green-500 focus:ring-green-500 rounded-none p-2 w-full; /* Blocky inputs */
+        }
+        .minecraft-button {
+            @apply bg-green-700 text-stone-100 font-bold py-3 px-6 border-b-4 border-green-900 hover:bg-green-600 active:border-b-0 active:translate-y-1 rounded-none transition-all duration-100 ease-in-out; /* Blocky button */
+        }
+        .minecraft-button-secondary {
+            @apply bg-amber-600 text-stone-900 font-bold py-3 px-6 border-b-4 border-amber-800 hover:bg-amber-500 active:border-b-0 active:translate-y-1 rounded-none transition-all duration-100 ease-in-out;
+        }
+        .minecraft-button-danger {
+            @apply bg-red-700 text-stone-100 font-bold py-3 px-6 border-b-4 border-red-900 hover:bg-red-600 active:border-b-0 active:translate-y-1 rounded-none transition-all duration-100 ease-in-out;
+        }
+        .minecraft-title {
+            @apply text-3xl md:text-4xl font-extrabold text-green-400 mb-6 text-center border-b-4 border-green-600 pb-2; /* Title style */
+        }
+        .minecraft-fieldset {
+            @apply border-4 border-stone-600 p-4 mb-6 rounded-none bg-stone-800; /* Fieldset style */
+        }
+        .minecraft-legend {
+            @apply text-xl font-bold text-green-300 px-2 -ml-2 bg-stone-700 border-2 border-stone-600 rounded-none; /* Legend style */
+        }
+        .minecraft-card {
+            @apply bg-stone-900 border-2 border-stone-600 p-4 rounded-none shadow-md;
+        }
+        .minecraft-table {
+            @apply w-full text-left border-collapse;
+        }
+        .minecraft-table th, .minecraft-table td {
+            @apply border-2 border-stone-600 p-2;
+        }
+        .minecraft-table th {
+            @apply bg-stone-700 text-green-300;
+        }
+        .minecraft-table td {
+            @apply bg-stone-800;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            @apply fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50;
+        }
+        .modal-content {
+            @apply minecraft-container w-11/12 md:w-1/2 lg:w-1/3;
+        }
+        .modal-header {
+            @apply text-xl font-bold text-green-400 mb-4 border-b-2 border-green-600 pb-2;
+        }
+        .modal-body {
+            @apply mb-6 text-stone-200;
+        }
+        .modal-footer {
+            @apply flex justify-end space-x-4;
+        }
+        .modal-close-btn {
+            @apply minecraft-button-secondary;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            @apply absolute inset-0 bg-stone-900 bg-opacity-90 flex items-center justify-center z-50;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner hidden">
+        <i class="fas fa-spinner fa-spin text-green-400 text-6xl"></i>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="customModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader"></div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button id="modalCloseBtn" class="minecraft-button-secondary modal-close-btn">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="minecraft-container w-full max-w-4xl">
+
+        <!-- Login View -->
+        <div id="loginView" class="view">
+            <h1 class="minecraft-title">เข้าสู่ระบบ</h1>
+            <form id="loginForm" class="space-y-4">
+                <label for="loginEmail" class="block text-stone-200">อีเมล:</label>
+                <input type="email" id="loginEmail" placeholder="อีเมล" class="minecraft-input" required>
+
+                <label for="loginPassword" class="block text-stone-200">รหัสผ่าน:</label>
+                <input type="password" id="loginPassword" placeholder="รหัสผ่าน" class="minecraft-input" required>
+
+                <button type="submit" class="minecraft-button w-full">เข้าสู่ระบบ</button>
+                <button type="button" id="googleLoginBtn" class="minecraft-button-secondary w-full flex items-center justify-center space-x-2">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
+                    <span>เข้าสู่ระบบด้วย Google</span>
+                </button>
+                <div id="recaptcha-container-login" class="mt-4"></div>
+                <label for="loginPhone" class="block text-stone-200 mt-4">เบอร์โทรศัพท์ (สำหรับเข้าสู่ระบบ):</label>
+                <input type="tel" id="loginPhone" placeholder="เช่น +66812345678" class="minecraft-input">
+                <button type="button" id="phoneLoginBtn" class="minecraft-button-secondary w-full">เข้าสู่ระบบด้วยเบอร์โทรศัพท์</button>
+                <input type="text" id="phoneOtpInput" placeholder="รหัส OTP" class="minecraft-input hidden mt-2">
+                <button type="button" id="verifyOtpBtn" class="minecraft-button w-full hidden mt-2">ยืนยัน OTP</button>
+
+
+                <p class="text-center text-stone-300 mt-4">
+                    <a href="#" id="forgotPasswordLink" class="text-green-400 hover:underline">ลืมรหัสผ่าน?</a> |
+                    <a href="#" id="registerLink" class="text-green-400 hover:underline">ลงทะเบียน</a>
+                </p>
+                <div id="loginMessage" class="text-red-400 text-center mt-4"></div>
+            </form>
+        </div>
+
+        <!-- Register View -->
+        <div id="registerView" class="view hidden">
+            <h1 class="minecraft-title">ลงทะเบียน</h1>
+            <form id="registerForm" class="space-y-4">
+                <label for="registerEmail" class="block text-stone-200">อีเมล:</label>
+                <input type="email" id="registerEmail" placeholder="อีเมล" class="minecraft-input" required>
+
+                <label for="registerPassword" class="block text-stone-200">รหัสผ่าน:</label>
+                <input type="password" id="registerPassword" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" class="minecraft-input" required>
+
+                <label for="registerPhone" class="block text-stone-200 mt-4">เบอร์โทรศัพท์ (ไม่บังคับ):</label>
+                <input type="tel" id="registerPhone" placeholder="เช่น +66812345678" class="minecraft-input">
+
+                <button type="submit" class="minecraft-button w-full">ลงทะเบียน</button>
+                <p class="text-center text-stone-300 mt-4">
+                    <a href="#" id="backToLoginLink" class="text-green-400 hover:underline">กลับไปหน้าเข้าสู่ระบบ</a>
+                </p>
+                <div id="registerMessage" class="text-red-400 text-center mt-4"></div>
+            </form>
+        </div>
+
+        <!-- Forgot Password View -->
+        <div id="forgotPasswordView" class="view hidden">
+            <h1 class="minecraft-title">ลืมรหัสผ่าน</h1>
+            <form id="forgotPasswordForm" class="space-y-4">
+                <label for="forgotEmail" class="block text-stone-200">อีเมล:</label>
+                <input type="email" id="forgotEmail" placeholder="อีเมลที่ลงทะเบียน" class="minecraft-input" required>
+
+                <button type="submit" class="minecraft-button w-full">ส่งลิงก์เปลี่ยนรหัสผ่าน</button>
+                <p class="text-center text-stone-300 mt-4">
+                    <a href="#" id="backToLoginFromForgotLink" class="text-green-400 hover:underline">กลับไปหน้าเข้าสู่ระบบ</a>
+                </p>
+                <div id="forgotPasswordMessage" class="text-red-400 text-center mt-4"></div>
+            </form>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="view hidden">
+            <h1 class="minecraft-title">Dashboard</h1>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
+                <p class="text-stone-200">ยินดีต้อนรับ, <span id="userEmail" class="font-bold text-green-400"></span>!</p>
+                <div class="flex space-x-4">
+                    <button id="goToFormBtn" class="minecraft-button-secondary">กรอกข้อมูลสวัสดิการ</button>
+                    <button id="logoutBtn" class="minecraft-button-danger">ออกจากระบบ</button>
+                </div>
+            </div>
+
+            <!-- User Profile Section -->
+            <div class="minecraft-fieldset mb-6">
+                <legend class="minecraft-legend">ข้อมูลโปรไฟล์</legend>
+                <div class="space-y-2">
+                    <p class="text-stone-200">UID: <span id="userUid" class="font-mono text-green-300 text-sm"></span></p>
+                    <p class="text-stone-200">อีเมล: <span id="profileEmail" class="text-green-300"></span></p>
+                    <label for="profileNationalId" class="block text-stone-200">หมายเลขบัตร ปชช.:</label>
+                    <input type="text" id="profileNationalId" placeholder="กรอกหมายเลขบัตรประชาชน" class="minecraft-input">
+                    <label for="profilePhoneNumber" class="block text-stone-200">เบอร์โทรศัพท์:</label>
+                    <input type="tel" id="profilePhoneNumber" placeholder="เช่น +66812345678" class="minecraft-input">
+                    <button id="saveProfileBtn" class="minecraft-button mt-4">บันทึกโปรไฟล์</button>
+                    <div id="profileMessage" class="text-red-400 mt-2"></div>
+                </div>
+            </div>
+
+            <!-- Dashboard Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="minecraft-card">
+                    <h3 class="text-xl font-bold text-green-300 mb-4">สถานะกำลังพล</h3>
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <div class="minecraft-card">
+                    <h3 class="text-xl font-bold text-green-300 mb-4">ประเภทสวัสดิการ</h3>
+                    <canvas id="welfareTypeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Simple Heatmap-like Table -->
+            <div class="minecraft-card mb-6">
+                <h3 class="text-xl font-bold text-green-300 mb-4">การกระจายสวัสดิการ (Heatmap-like)</h3>
+                <div class="overflow-x-auto">
+                    <table class="minecraft-table">
+                        <thead>
+                            <tr>
+                                <th>หน่วย</th>
+                                <th>สวัสดิการ A</th>
+                                <th>สวัสดิการ B</th>
+                                <th>สวัสดิการ C</th>
+                            </tr>
+                        </thead>
+                        <tbody id="heatmapTableBody">
+                            <!-- Data will be populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form View -->
+        <div id="formView" class="view hidden">
+            <h1 class="minecraft-title">กรอกข้อมูลสวัสดิการ</h1>
+            <form id="welfareForm" class="space-y-4">
+                <fieldset class="minecraft-fieldset">
+                    <legend class="minecraft-legend">ข้อมูลกำลังพล</legend>
+                    <label for="personnelId" class="block text-stone-200">รหัสกำลังพล:</label>
+                    <input type="text" id="personnelId" class="minecraft-input" required>
+
+                    <label for="personnelName" class="block text-stone-200">ชื่อ-สกุล:</label>
+                    <input type="text" id="personnelName" class="minecraft-input" required>
+
+                    <label for="unit" class="block text-stone-200">สังกัดหน่วย:</label>
+                    <input type="text" id="unit" class="minecraft-input">
+
+                    <label for="status" class="block text-stone-200">สถานะกำลังพล:</label>
+                    <select id="status" class="minecraft-select">
+                        <option value="active">ประจำการ</option>
+                        <option value="retired">เกษียณ</option>
+                        <option value="disabled">ทุพพลภาพ</option>
+                        <option value="deceased">เสียชีวิต</option>
+                    </select>
+
+                    <label for="birthDate" class="block text-stone-200">วัน/เดือน/ปีเกิด:</label>
+                    <input type="date" id="birthDate" class="minecraft-input">
+                </fieldset>
+
+                <fieldset class="minecraft-fieldset">
+                    <legend class="minecraft-legend">ข้อมูลสวัสดิการที่ได้รับ</legend>
+                    <label for="welfareType" class="block text-stone-200">ประเภทสวัสดิการ:</label>
+                    <select id="welfareType" class="minecraft-select">
+                        <option value="pension">บำนาญ</option>
+                        <option value="medical">ค่ารักษาพยาบาล</option>
+                        <option value="education">ทุนการศึกษาบุตร</option>
+                        <option value="housing">สวัสดิการที่อยู่อาศัย</option>
+                        <option value="disability">เงินช่วยเหลือทุพพลภาพ</option>
+                        <option value="other">อื่นๆ</option>
+                    </select>
+
+                    <label for="welfareAmount" class="block text-stone-200">จำนวนเงิน (บาท):</label>
+                    <input type="number" id="welfareAmount" class="minecraft-input" value="0" min="0">
+
+                    <label for="welfareDate" class="block text-stone-200">วันที่ได้รับ:</label>
+                    <input type="date" id="welfareDate" class="minecraft-input">
+
+                    <label for="notes" class="block text-stone-200">หมายเหตุ:</label>
+                    <textarea id="notes" rows="3" class="minecraft-textarea"></textarea>
+
+                    <label for="supportingDoc" class="block text-stone-200">เอกสารประกอบ (PDF/รูปภาพ):</label>
+                    <input type="file" id="supportingDoc" accept=".pdf,image/*" class="minecraft-input file:minecraft-button-secondary file:border-none file:rounded-none file:py-2 file:px-4 file:mr-4">
+                </fieldset>
+
+                <button type="submit" class="minecraft-button w-full">บันทึกข้อมูลสวัสดิการ</button>
+                <button type="button" id="backToDashboardBtn" class="minecraft-button-secondary w-full mt-4">กลับ Dashboard</button>
+                <div id="formMessage" class="text-red-400 mt-4 text-center"></div>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; // Use 10.12.2 for consistency
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        // Your web app's Firebase configuration (provided by user)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQ-RXl0oCcv2m-E4UdAN0EBM23Pim-CkU",
+            authDomain: "wer-rta-19abb.firebaseapp.com",
+            databaseURL: "https://wer-rta-19abb-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "wer-rta-19abb",
+            storageBucket: "wer-rta-19abb.firebasestorage.app",
+            messagingSenderId: "589588167770",
+            appId: "1:589588167770:web:000cbdc807136d9f522c63"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Global Variables
+        let currentView = 'login';
+        let inactivityTimeout;
+        const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes in milliseconds
+        let recaptchaVerifier;
+        let confirmationResult; // For phone auth
+
+        // --- UI Elements ---
+        const appContainer = document.getElementById('app');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const customModal = document.getElementById('customModal');
+        const modalHeader = document.getElementById('modalHeader');
+        const modalBody = document.getElementById('modalBody');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        // Views
+        const loginView = document.getElementById('loginView');
+        const registerView = document.getElementById('registerView');
+        const forgotPasswordView = document.getElementById('forgotPasswordView');
+        const dashboardView = document.getElementById('dashboardView');
+        const formView = document.getElementById('formView');
+
+        // Login Elements
+        const loginForm = document.getElementById('loginForm');
+        const loginEmailInput = document.getElementById('loginEmail');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const loginMessage = document.getElementById('loginMessage');
+        const registerLink = document.getElementById('registerLink');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const loginPhoneInput = document.getElementById('loginPhone');
+        const phoneLoginBtn = document.getElementById('phoneLoginBtn');
+        const phoneOtpInput = document.getElementById('phoneOtpInput');
+        const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+        const recaptchaContainerLogin = document.getElementById('recaptcha-container-login');
+
+
+        // Register Elements
+        const registerForm = document.getElementById('registerForm');
+        const registerEmailInput = document.getElementById('registerEmail');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const registerPhoneInput = document.getElementById('registerPhone');
+        const registerMessage = document.getElementById('registerMessage');
+        const backToLoginLink = document.getElementById('backToLoginLink');
+
+        // Forgot Password Elements
+        const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+        const forgotEmailInput = document.getElementById('forgotEmail');
+        const forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
+        const backToLoginFromForgotLink = document.getElementById('backToLoginFromForgotLink');
+
+        // Dashboard Elements
+        const userEmailSpan = document.getElementById('userEmail');
+        const userUidSpan = document.getElementById('userUid');
+        const profileEmailInput = document.getElementById('profileEmail');
+        const profileNationalIdInput = document.getElementById('profileNationalId');
+        const profilePhoneNumberInput = document.getElementById('profilePhoneNumber');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const profileMessage = document.getElementById('profileMessage');
+        const goToFormBtn = document.getElementById('goToFormBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const statusChartCanvas = document.getElementById('statusChart');
+        const welfareTypeChartCanvas = document.getElementById('welfareTypeChart');
+        const heatmapTableBody = document.getElementById('heatmapTableBody');
+        let statusChartInstance = null;
+        let welfareTypeChartInstance = null;
+
+
+        // Form Elements
+        const welfareForm = document.getElementById('welfareForm');
+        const personnelIdInput = document.getElementById('personnelId');
+        const personnelNameInput = document.getElementById('personnelName');
+        const unitInput = document.getElementById('unit');
+        const statusSelect = document.getElementById('status');
+        const birthDateInput = document.getElementById('birthDate');
+        const welfareTypeSelect = document.getElementById('welfareType');
+        const welfareAmountInput = document.getElementById('welfareAmount');
+        const welfareDateInput = document.getElementById('welfareDate');
+        const notesTextarea = document.getElementById('notes');
+        const supportingDocInput = document.getElementById('supportingDoc');
+        const formMessage = document.getElementById('formMessage');
+        const backToDashboardBtn = document.getElementById('backToDashboardBtn');
+
+        // --- Helper Functions ---
+
+        function showLoading() {
+            loadingSpinner.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            loadingSpinner.classList.add('hidden');
+        }
+
+        function showModal(header, body, type = 'info') {
+            modalHeader.textContent = header;
+            modalBody.textContent = body;
+            // You can add more styling based on type if needed
+            customModal.classList.remove('hidden');
+        }
+
+        function hideModal() {
+            customModal.classList.add('hidden');
+        }
+
+        function showView(viewName) {
+            const views = [loginView, registerView, forgotPasswordView, dashboardView, formView];
+            views.forEach(view => view.classList.add('hidden'));
+
+            switch (viewName) {
+                case 'login':
+                    loginView.classList.remove('hidden');
+                    // Initialize reCAPTCHA for phone login if not already done
+                    if (!recaptchaVerifier) {
+                        recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerLogin, {
+                            'size': 'invisible', // or 'normal' if you want it visible
+                            'callback': (response) => {
+                                // reCAPTCHA solved, allow signInWithPhoneNumber.
+                                // You can optionally hide the reCAPTCHA container if 'size' is 'normal'
+                            },
+                            'expired-callback': () => {
+                                // Response expired. Ask user to solve reCAPTCHA again.
+                                showModal('Error', 'reCAPTCHA has expired. Please try again.', 'error');
+                            }
+                        });
+                        recaptchaVerifier.render(); // Render it
+                    }
+                    break;
+                case 'register':
+                    registerView.classList.remove('hidden');
+                    break;
+                case 'forgotPassword':
+                    forgotPasswordView.classList.remove('hidden');
+                    break;
+                case 'dashboard':
+                    dashboardView.classList.remove('hidden');
+                    loadDashboardData(); // Load data when dashboard is shown
+                    break;
+                case 'form':
+                    formView.classList.remove('hidden');
+                    break;
+            }
+            currentView = viewName;
+        }
+
+        function displayMessage(element, message, type = 'error') {
+            element.textContent = message;
+            element.className = `text-center mt-4 ${type === 'error' ? 'text-red-400' : 'text-green-400'}`;
+        }
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(async () => {
+                if (auth.currentUser) {
+                    showLoading();
+                    await auth.signOut();
+                    hideLoading();
+                    showModal('Session Expired', 'คุณถูกออกจากระบบเนื่องจากไม่มีการใช้งาน', 'info');
+                    showView('login');
+                }
+            }, INACTIVITY_LIMIT);
+        }
+
+        // --- Firebase Authentication Handlers ---
+
+        // Listen for auth state changes
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                userEmailSpan.textContent = user.email || user.phoneNumber || 'N/A';
+                userUidSpan.textContent = user.uid;
+                profileEmailInput.value = user.email || '';
+                profilePhoneNumberInput.value = user.phoneNumber || '';
+
+                // Fetch user profile from Firestore
+                await fetchUserProfile(user.uid);
+
+                showView('dashboard');
+                resetInactivityTimer(); // Start timer when logged in
+            } else {
+                // User is signed out
+                showView('login');
+                clearTimeout(inactivityTimeout); // Clear timer if logged out
+            }
+        });
+
+        // Email/Password Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+            showLoading();
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                displayMessage(loginMessage, 'เข้าสู่ระบบสำเร็จ!', 'success');
+                // onAuthStateChanged will handle view change
+            } catch (error) {
+                console.error("Login Error:", error);
+                let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+                }
+                displayMessage(loginMessage, errorMessage);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Google Login
+        googleLoginBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            showLoading();
+            try {
+                await signInWithPopup(auth, provider);
+                displayMessage(loginMessage, 'เข้าสู่ระบบด้วย Google สำเร็จ!', 'success');
+                // onAuthStateChanged will handle view change
+            } catch (error) {
+                console.error("Google Login Error:", error);
+                let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google';
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'คุณปิดหน้าต่าง Google Login';
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMessage = 'มีการร้องขอ Google Login ซ้ำซ้อน';
+                }
+                displayMessage(loginMessage, errorMessage);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Phone Login (Request OTP)
+        phoneLoginBtn.addEventListener('click', async () => {
+            const phoneNumber = loginPhoneInput.value;
+            if (!phoneNumber) {
+                displayMessage(loginMessage, 'กรุณากรอกเบอร์โทรศัพท์');
+                return;
+            }
+            showLoading();
+            try {
+                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+                phoneOtpInput.classList.remove('hidden');
+                verifyOtpBtn.classList.remove('hidden');
+                phoneLoginBtn.classList.add('hidden'); // Hide request button
+                displayMessage(loginMessage, 'ส่งรหัส OTP ไปยังเบอร์โทรศัพท์ของคุณแล้ว', 'success');
+            } catch (error) {
+                console.error("Phone Login Error:", error);
+                let errorMessage = 'เกิดข้อผิดพลาดในการส่ง OTP';
+                if (error.code === 'auth/invalid-phone-number') {
+                    errorMessage = 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง (เช่น +66xxxxxxxx)';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = 'มีการร้องขอ OTP มากเกินไป กรุณารอสักครู่';
+                }
+                displayMessage(loginMessage, errorMessage);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Phone Login (Verify OTP)
+        verifyOtpBtn.addEventListener('click', async () => {
+            const otpCode = phoneOtpInput.value;
+            if (!otpCode) {
+                displayMessage(loginMessage, 'กรุณากรอกรหัส OTP');
+                return;
+            }
+            showLoading();
+            try {
+                await confirmationResult.confirm(otpCode);
+                displayMessage(loginMessage, 'เข้าสู่ระบบด้วยเบอร์โทรศัพท์สำเร็จ!', 'success');
+                // onAuthStateChanged will handle view change
+            } catch (error) {
+                console.error("OTP Verification Error:", error);
+                let errorMessage = 'รหัส OTP ไม่ถูกต้องหรือไม่ถูกต้อง';
+                if (error.code === 'auth/invalid-verification-code') {
+                    errorMessage = 'รหัส OTP ไม่ถูกต้อง';
+                }
+                displayMessage(loginMessage, errorMessage);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Register
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = registerEmailInput.value;
+            const password = registerPasswordInput.value;
+            const phoneNumber = registerPhoneInput.value;
+            showLoading();
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Save phone number to user profile in Firestore if provided
+                if (phoneNumber) {
+                    await setDoc(doc(db, 'users', user.uid), {
+                        email: user.email,
+                        phoneNumber: phoneNumber,
+                        createdAt: serverTimestamp()
+                    }, { merge: true });
+                } else {
+                     await setDoc(doc(db, 'users', user.uid), {
+                        email: user.email,
+                        createdAt: serverTimestamp()
+                    }, { merge: true });
+                }
+
+                displayMessage(registerMessage, 'ลงทะเบียนสำเร็จ! คุณสามารถเข้าสู่ระบบได้แล้ว', 'success');
+                showView('login'); // Go back to login after registration
+            } catch (error) {
+                console.error("Register Error:", error);
+                let errorMessage = 'เกิดข้อผิดพลาดในการลงทะเบียน';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'รหัสผ่านอ่อนเกินไป (ต้องมีอย่างน้อย 6 ตัวอักษร)';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+                }
+                displayMessage(registerMessage, errorMessage);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Forgot Password
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = forgotEmailInput.value;
+            showLoading();
+            try {
+                await sendPasswordResetEmail(auth, email);
+                displayMessage(forgotPasswordMessage, 'ส่งลิงก์เปลี่ยนรหัสผ่านไปยังอีเมลของคุณแล้ว', 'success');
+            } catch (error) {
+                console.error("Forgot Password Error:", error);
+                let errorMessage = 'เกิดข้อผิดพลาดในการส่งลิงก์เปลี่ยนรหัสผ่าน';
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'ไม่พบผู้ใช้ด้วยอีเมลนี้';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+                }
+                displayMessage(forgotPasswordMessage, errorMessage);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            showLoading();
+            try {
+                await signOut(auth);
+                displayMessage(loginMessage, 'ออกจากระบบสำเร็จ', 'success');
+                // onAuthStateChanged will handle view change
+            } catch (error) {
+                console.error("Logout Error:", error);
+                showModal('Error', 'เกิดข้อผิดพลาดในการออกจากระบบ', 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // --- User Profile Management ---
+        async function fetchUserProfile(uid) {
+            try {
+                const userDocRef = doc(db, 'users', uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    profileNationalIdInput.value = userData.nationalId || '';
+                    profilePhoneNumberInput.value = userData.phoneNumber || '';
+                } else {
+                    // Create a basic profile if it doesn't exist
+                    await setDoc(userDocRef, {
+                        email: auth.currentUser.email,
+                        createdAt: serverTimestamp()
+                    }, { merge: true });
+                }
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+                displayMessage(profileMessage, 'เกิดข้อผิดพลาดในการดึงข้อมูลโปรไฟล์', 'error');
+            }
+        }
+
+        saveProfileBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user) {
+                showModal('Error', 'คุณต้องเข้าสู่ระบบก่อน', 'error');
+                return;
+            }
+            showLoading();
+            try {
+                const nationalId = profileNationalIdInput.value;
+                const phoneNumber = profilePhoneNumberInput.value;
+                await updateDoc(doc(db, 'users', user.uid), {
+                    nationalId: nationalId || null,
+                    phoneNumber: phoneNumber || null,
+                    updatedAt: serverTimestamp()
+                });
+                displayMessage(profileMessage, 'บันทึกโปรไฟล์สำเร็จ!', 'success');
+            } catch (error) {
+                console.error("Error saving profile:", error);
+                displayMessage(profileMessage, 'เกิดข้อผิดพลาดในการบันทึกโปรไฟล์', 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // --- Form Submission ---
+        welfareForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                showModal('Error', 'คุณต้องเข้าสู่ระบบก่อนจึงจะบันทึกข้อมูลได้', 'error');
+                return;
+            }
+
+            showLoading();
+            try {
+                const personnelData = {
+                    personnelId: personnelIdInput.value,
+                    personnelName: personnelNameInput.value,
+                    unit: unitInput.value,
+                    status: statusSelect.value,
+                    birthDate: birthDateInput.value ? new Date(birthDateInput.value) : null,
+                    welfareType: welfareTypeSelect.value,
+                    welfareAmount: parseFloat(welfareAmountInput.value) || 0,
+                    welfareDate: welfareDateInput.value ? new Date(welfareDateInput.value) : null,
+                    notes: notesTextarea.value,
+                    userId: user.uid, // Link to the user who submitted
+                    timestamp: serverTimestamp()
+                };
+
+                // Handle file upload if a file is selected
+                const supportingDocFile = supportingDocInput.files[0];
+                if (supportingDocFile) {
+                    const storageRef = ref(storage, `supporting_documents/${user.uid}/${Date.now()}_${supportingDocFile.name}`);
+                    const uploadTask = await uploadBytes(storageRef, supportingDocFile);
+                    const downloadURL = await getDownloadURL(uploadTask.ref);
+                    personnelData.supportingDocUrl = downloadURL;
+                }
+
+                await addDoc(collection(db, 'formSubmissions'), personnelData);
+                displayMessage(formMessage, 'บันทึกข้อมูลสวัสดิการสำเร็จ!', 'success');
+                welfareForm.reset(); // Clear form
+                supportingDocInput.value = ''; // Clear file input
+            } catch (error) {
+                console.error("Form Submission Error:", error);
+                displayMessage(formMessage, `เกิดข้อผิดพลาดในการบันทึก: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // --- Dashboard Data & Charts ---
+        async function loadDashboardData() {
+            showLoading();
+            try {
+                const q = query(collection(db, 'formSubmissions'), orderBy('timestamp', 'desc'));
+
+                onSnapshot(q, (snapshot) => {
+                    const data = [];
+                    snapshot.forEach(doc => {
+                        data.push(doc.data());
+                    });
+                    renderCharts(data);
+                    renderHeatmapTable(data);
+                    hideLoading();
+                }, (error) => {
+                    console.error("Error listening to form submissions:", error);
+                    showModal('Error', 'ไม่สามารถโหลดข้อมูล Dashboard ได้', 'error');
+                    hideLoading();
+                });
+
+            } catch (error) {
+                console.error("Error loading dashboard data:", error);
+                showModal('Error', 'เกิดข้อผิดพลาดในการโหลดข้อมูล Dashboard', 'error');
+                hideLoading();
+            }
+        }
+
+        function renderCharts(data) {
+            // Destroy existing chart instances if they exist
+            if (statusChartInstance) statusChartInstance.destroy();
+            if (welfareTypeChartInstance) welfareTypeChartInstance.destroy();
+
+            // Aggregate data for Status Chart
+            const statusCounts = data.reduce((acc, item) => {
+                acc[item.status] = (acc[item.status] || 0) + 1;
+                return acc;
+            }, {});
+            const statusLabels = Object.keys(statusCounts);
+            const statusValues = Object.values(statusCounts);
+
+            // Aggregate data for Welfare Type Chart
+            const welfareTypeCounts = data.reduce((acc, item) => {
+                acc[item.welfareType] = (acc[item.welfareType] || 0) + 1;
+                return acc;
+            }, {});
+            const welfareTypeLabels = Object.keys(welfareTypeCounts);
+            const welfareTypeValues = Object.values(welfareTypeCounts);
+
+            // Status Chart (Pie Chart)
+            statusChartInstance = new Chart(statusChartCanvas, {
+                type: 'pie',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: [
+                            'rgb(75, 192, 192)', // active
+                            'rgb(255, 159, 64)', // retired
+                            'rgb(255, 99, 132)', // disabled
+                            'rgb(54, 162, 235)'  // deceased
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgb(209, 213, 219)' // stone-300
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'สถานะกำลังพล',
+                            color: 'rgb(209, 213, 219)'
+                        }
+                    }
+                }
+            });
+
+            // Welfare Type Chart (Bar Chart)
+            welfareTypeChartInstance = new Chart(welfareTypeChartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: welfareTypeLabels,
+                    datasets: [{
+                        label: 'จำนวนรายการ',
+                        data: welfareTypeValues,
+                        backgroundColor: 'rgb(16, 185, 129)', // green-500
+                        borderColor: 'rgb(5, 150, 105)', // green-600
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgb(209, 213, 219)'
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'ประเภทสวัสดิการ',
+                            color: 'rgb(209, 213, 219)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgb(209, 213, 219)'
+                            },
+                            grid: {
+                                color: 'rgb(63, 63, 70)' // stone-700
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgb(209, 213, 219)'
+                            },
+                            grid: {
+                                color: 'rgb(63, 63, 70)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderHeatmapTable(data) {
+            heatmapTableBody.innerHTML = ''; // Clear existing rows
+
+            // Aggregate data for heatmap-like table: unit vs welfare type counts
+            const unitWelfareCounts = {};
+            const allUnits = new Set();
+            const allWelfareTypes = new Set();
+
+            data.forEach(item => {
+                const unit = item.unit || 'ไม่ระบุหน่วย';
+                const welfareType = item.welfareType || 'ไม่ระบุประเภท';
+
+                allUnits.add(unit);
+                allWelfareTypes.add(welfareType);
+
+                if (!unitWelfareCounts[unit]) {
+                    unitWelfareCounts[unit] = {};
+                }
+                unitWelfareCounts[unit][welfareType] = (unitWelfareCounts[unit][welfareType] || 0) + 1;
+            });
+
+            const sortedUnits = Array.from(allUnits).sort();
+            const sortedWelfareTypes = Array.from(allWelfareTypes).sort();
+
+            // Update table header for dynamic welfare types
+            const headerRow = document.querySelector('.minecraft-table thead tr');
+            headerRow.innerHTML = '<th>หน่วย</th>' + sortedWelfareTypes.map(type => `<th>${type}</th>`).join('');
+
+
+            // Populate table body
+            sortedUnits.forEach(unit => {
+                const row = document.createElement('tr');
+                const unitCell = document.createElement('td');
+                unitCell.textContent = unit;
+                row.appendChild(unitCell);
+
+                sortedWelfareTypes.forEach(type => {
+                    const count = unitWelfareCounts[unit] && unitWelfareCounts[unit][type] ? unitWelfareCounts[unit][type] : 0;
+                    const cell = document.createElement('td');
+                    cell.textContent = count;
+
+                    // Apply color based on count (simple heatmap logic)
+                    if (count > 5) {
+                        cell.classList.add('bg-red-700'); // High activity
+                    } else if (count > 2) {
+                        cell.classList.add('bg-orange-700'); // Medium activity
+                    } else if (count > 0) {
+                        cell.classList.add('bg-yellow-700'); // Low activity
+                    } else {
+                        cell.classList.add('bg-stone-800'); // No activity
+                    }
+                    row.appendChild(cell);
+                });
+                heatmapTableBody.appendChild(row);
+            });
+        }
+
+
+        // --- Event Listeners for View Navigation ---
+        registerLink.addEventListener('click', (e) => { e.preventDefault(); showView('register'); });
+        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); showView('forgotPassword'); });
+        backToLoginLink.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
+        backToLoginFromForgotLink.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
+        goToFormBtn.addEventListener('click', () => showView('form'));
+        backToDashboardBtn.addEventListener('click', () => showView('dashboard'));
+        modalCloseBtn.addEventListener('click', hideModal);
+
+        // --- Initial Load ---
+        // onAuthStateChanged will handle the initial view based on login status
+        // Add event listeners for inactivity timer
+        ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
+            document.addEventListener(event, resetInactivityTimer);
+        });
+        // Initial call to set up the timer if already logged in (e.g., page refresh)
+        if (auth.currentUser) {
+            resetInactivityTimer();
+        }
+
+    </script>
+</body>
+</html>
