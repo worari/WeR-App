@@ -11,49 +11,49 @@
     <!-- Font Awesome for icons (e.g., loading spinner) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Custom Minecraft-themed styles */
+        /* Official/Formal Theme Styles (Green, Blue, Orange) */
         body {
             font-family: 'Inter', sans-serif; /* Fallback to sans-serif if Inter is not loaded */
-            @apply bg-stone-800 text-stone-100; /* Dark earth background */
+            @apply bg-gray-100 text-gray-800; /* Light gray background, dark text */
         }
-        .minecraft-container {
-            @apply bg-stone-700 border-4 border-stone-900 shadow-xl p-6 md:p-8 rounded-none; /* Blocky container */
+        .official-container {
+            @apply bg-white border border-blue-200 shadow-lg p-6 md:p-8 rounded-lg; /* Rounded container with subtle border */
         }
-        .minecraft-input, .minecraft-textarea, .minecraft-select {
-            @apply bg-stone-900 text-stone-100 border-2 border-stone-600 focus:border-green-500 focus:ring-green-500 rounded-none p-2 w-full; /* Blocky inputs */
+        .official-input, .official-textarea, .official-select {
+            @apply bg-white text-gray-800 border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md p-2 w-full; /* Rounded inputs with subtle borders */
         }
-        .minecraft-button {
-            @apply bg-green-700 text-stone-100 font-bold py-3 px-6 border-b-4 border-green-900 hover:bg-green-600 active:border-b-0 active:translate-y-1 rounded-none transition-all duration-100 ease-in-out; /* Blocky button */
+        .official-button {
+            @apply bg-emerald-700 text-white font-semibold py-3 px-6 rounded-md shadow-md hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-150 ease-in-out; /* Professional green button */
         }
-        .minecraft-button-secondary {
-            @apply bg-amber-600 text-stone-900 font-bold py-3 px-6 border-b-4 border-amber-800 hover:bg-amber-500 active:border-b-0 active:translate-y-1 rounded-none transition-all duration-100 ease-in-out;
+        .official-button-secondary {
+            @apply bg-blue-600 text-white font-semibold py-3 px-6 rounded-md shadow-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-all duration-150 ease-in-out; /* Professional blue secondary button */
         }
-        .minecraft-button-danger {
-            @apply bg-red-700 text-stone-100 font-bold py-3 px-6 border-b-4 border-red-900 hover:bg-red-600 active:border-b-0 active:translate-y-1 rounded-none transition-all duration-100 ease-in-out;
+        .official-button-danger {
+            @apply bg-red-600 text-white font-semibold py-3 px-6 rounded-md shadow-md hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 transition-all duration-150 ease-in-out; /* Professional red danger button */
         }
-        .minecraft-title {
-            @apply text-3xl md:text-4xl font-extrabold text-green-400 mb-6 text-center border-b-4 border-green-600 pb-2; /* Title style */
+        .official-title {
+            @apply text-3xl md:text-4xl font-extrabold text-blue-800 mb-6 text-center border-b-2 border-blue-400 pb-2; /* Official blue title */
         }
-        .minecraft-fieldset {
-            @apply border-4 border-stone-600 p-4 mb-6 rounded-none bg-stone-800; /* Fieldset style */
+        .official-fieldset {
+            @apply border border-gray-300 p-4 mb-6 rounded-lg bg-gray-50; /* Rounded fieldset with light background */
         }
-        .minecraft-legend {
-            @apply text-xl font-bold text-green-300 px-2 -ml-2 bg-stone-700 border-2 border-stone-600 rounded-none; /* Legend style */
+        .official-legend {
+            @apply text-xl font-bold text-blue-700 px-2 -ml-2 bg-white border border-gray-300 rounded-md; /* Official blue legend */
         }
-        .minecraft-card {
-            @apply bg-stone-900 border-2 border-stone-600 p-4 rounded-none shadow-md;
+        .official-card {
+            @apply bg-white border border-gray-200 p-4 rounded-lg shadow-sm; /* Clean card style */
         }
-        .minecraft-table {
+        .official-table {
             @apply w-full text-left border-collapse;
         }
-        .minecraft-table th, .minecraft-table td {
-            @apply border-2 border-stone-600 p-2;
+        .official-table th, .official-table td {
+            @apply border border-gray-300 p-2;
         }
-        .minecraft-table th {
-            @apply bg-stone-700 text-green-300;
+        .official-table th {
+            @apply bg-blue-100 text-blue-800 font-semibold;
         }
-        .minecraft-table td {
-            @apply bg-stone-800;
+        .official-table td {
+            @apply bg-white text-gray-800;
         }
 
         /* Modal styles */
@@ -61,24 +61,24 @@
             @apply fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50;
         }
         .modal-content {
-            @apply minecraft-container w-11/12 md:w-1/2 lg:w-1/3;
+            @apply official-container w-11/12 md:w-1/2 lg:w-1/3;
         }
         .modal-header {
-            @apply text-xl font-bold text-green-400 mb-4 border-b-2 border-green-600 pb-2;
+            @apply text-xl font-bold text-blue-700 mb-4 border-b-2 border-blue-400 pb-2;
         }
         .modal-body {
-            @apply mb-6 text-stone-200;
+            @apply mb-6 text-gray-700;
         }
         .modal-footer {
             @apply flex justify-end space-x-4;
         }
         .modal-close-btn {
-            @apply minecraft-button-secondary;
+            @apply official-button-secondary;
         }
 
         /* Loading spinner */
         .loading-spinner {
-            @apply absolute inset-0 bg-stone-900 bg-opacity-90 flex items-center justify-center z-50;
+            @apply absolute inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50;
         }
     </style>
 </head>
@@ -86,7 +86,7 @@
 
     <!-- Loading Spinner -->
     <div id="loadingSpinner" class="loading-spinner hidden">
-        <i class="fas fa-spinner fa-spin text-green-400 text-6xl"></i>
+        <i class="fas fa-spinner fa-spin text-blue-500 text-6xl"></i>
     </div>
 
     <!-- Custom Alert Modal -->
@@ -95,124 +95,124 @@
             <div class="modal-header" id="modalHeader"></div>
             <div class="modal-body" id="modalBody"></div>
             <div class="modal-footer">
-                <button id="modalCloseBtn" class="minecraft-button-secondary modal-close-btn">ปิด</button>
+                <button id="modalCloseBtn" class="official-button-secondary modal-close-btn">ปิด</button>
             </div>
         </div>
     </div>
 
     <!-- Main App Container -->
-    <div id="app" class="minecraft-container w-full max-w-4xl">
+    <div id="app" class="official-container w-full max-w-4xl">
 
         <!-- Login View -->
         <div id="loginView" class="view">
-            <h1 class="minecraft-title">เข้าสู่ระบบ</h1>
+            <h1 class="official-title">เข้าสู่ระบบ</h1>
             <form id="loginForm" class="space-y-4">
-                <label for="loginEmail" class="block text-stone-200">อีเมล:</label>
-                <input type="email" id="loginEmail" placeholder="อีเมล" class="minecraft-input" required>
+                <label for="loginEmail" class="block text-gray-700">อีเมล:</label>
+                <input type="email" id="loginEmail" placeholder="อีเมล" class="official-input" required>
 
-                <label for="loginPassword" class="block text-stone-200">รหัสผ่าน:</label>
-                <input type="password" id="loginPassword" placeholder="รหัสผ่าน" class="minecraft-input" required>
+                <label for="loginPassword" class="block text-gray-700">รหัสผ่าน:</label>
+                <input type="password" id="loginPassword" placeholder="รหัสผ่าน" class="official-input" required>
 
-                <button type="submit" class="minecraft-button w-full">เข้าสู่ระบบ</button>
-                <button type="button" id="googleLoginBtn" class="minecraft-button-secondary w-full flex items-center justify-center space-x-2">
+                <button type="submit" class="official-button w-full">เข้าสู่ระบบ</button>
+                <button type="button" id="googleLoginBtn" class="official-button-secondary w-full flex items-center justify-center space-x-2">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
                     <span>เข้าสู่ระบบด้วย Google</span>
                 </button>
                 <div id="recaptcha-container-login" class="mt-4"></div>
-                <label for="loginPhone" class="block text-stone-200 mt-4">เบอร์โทรศัพท์ (สำหรับเข้าสู่ระบบ):</label>
-                <input type="tel" id="loginPhone" placeholder="เช่น +66812345678" class="minecraft-input">
-                <button type="button" id="phoneLoginBtn" class="minecraft-button-secondary w-full">เข้าสู่ระบบด้วยเบอร์โทรศัพท์</button>
-                <input type="text" id="phoneOtpInput" placeholder="รหัส OTP" class="minecraft-input hidden mt-2">
-                <button type="button" id="verifyOtpBtn" class="minecraft-button w-full hidden mt-2">ยืนยัน OTP</button>
+                <label for="loginPhone" class="block text-gray-700 mt-4">เบอร์โทรศัพท์ (สำหรับเข้าสู่ระบบ):</label>
+                <input type="tel" id="loginPhone" placeholder="เช่น +66812345678" class="official-input">
+                <button type="button" id="phoneLoginBtn" class="official-button-secondary w-full">เข้าสู่ระบบด้วยเบอร์โทรศัพท์</button>
+                <input type="text" id="phoneOtpInput" placeholder="รหัส OTP" class="official-input hidden mt-2">
+                <button type="button" id="verifyOtpBtn" class="official-button w-full hidden mt-2">ยืนยัน OTP</button>
 
 
-                <p class="text-center text-stone-300 mt-4">
-                    <a href="#" id="forgotPasswordLink" class="text-green-400 hover:underline">ลืมรหัสผ่าน?</a> |
-                    <a href="#" id="registerLink" class="text-green-400 hover:underline">ลงทะเบียน</a>
+                <p class="text-center text-gray-600 mt-4">
+                    <a href="#" id="forgotPasswordLink" class="text-blue-600 hover:underline">ลืมรหัสผ่าน?</a> |
+                    <a href="#" id="registerLink" class="text-blue-600 hover:underline">ลงทะเบียน</a>
                 </p>
-                <div id="loginMessage" class="text-red-400 text-center mt-4"></div>
+                <div id="loginMessage" class="text-red-600 text-center mt-4"></div>
             </form>
         </div>
 
         <!-- Register View -->
         <div id="registerView" class="view hidden">
-            <h1 class="minecraft-title">ลงทะเบียน</h1>
+            <h1 class="official-title">ลงทะเบียน</h1>
             <form id="registerForm" class="space-y-4">
-                <label for="registerEmail" class="block text-stone-200">อีเมล:</label>
-                <input type="email" id="registerEmail" placeholder="อีเมล" class="minecraft-input" required>
+                <label for="registerEmail" class="block text-gray-700">อีเมล:</label>
+                <input type="email" id="registerEmail" placeholder="อีเมล" class="official-input" required>
 
-                <label for="registerPassword" class="block text-stone-200">รหัสผ่าน:</label>
-                <input type="password" id="registerPassword" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" class="minecraft-input" required>
+                <label for="registerPassword" class="block text-gray-700">รหัสผ่าน:</label>
+                <input type="password" id="registerPassword" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" class="official-input" required>
 
-                <label for="registerPhone" class="block text-stone-200 mt-4">เบอร์โทรศัพท์ (ไม่บังคับ):</label>
-                <input type="tel" id="registerPhone" placeholder="เช่น +66812345678" class="minecraft-input">
+                <label for="registerPhone" class="block text-gray-700 mt-4">เบอร์โทรศัพท์ (ไม่บังคับ):</label>
+                <input type="tel" id="registerPhone" placeholder="เช่น +66812345678" class="official-input">
 
-                <button type="submit" class="minecraft-button w-full">ลงทะเบียน</button>
-                <p class="text-center text-stone-300 mt-4">
-                    <a href="#" id="backToLoginLink" class="text-green-400 hover:underline">กลับไปหน้าเข้าสู่ระบบ</a>
+                <button type="submit" class="official-button w-full">ลงทะเบียน</button>
+                <p class="text-center text-gray-600 mt-4">
+                    <a href="#" id="backToLoginLink" class="text-blue-600 hover:underline">กลับไปหน้าเข้าสู่ระบบ</a>
                 </p>
-                <div id="registerMessage" class="text-red-400 text-center mt-4"></div>
+                <div id="registerMessage" class="text-red-600 text-center mt-4"></div>
             </form>
         </div>
 
         <!-- Forgot Password View -->
         <div id="forgotPasswordView" class="view hidden">
-            <h1 class="minecraft-title">ลืมรหัสผ่าน</h1>
+            <h1 class="official-title">ลืมรหัสผ่าน</h1>
             <form id="forgotPasswordForm" class="space-y-4">
-                <label for="forgotEmail" class="block text-stone-200">อีเมล:</label>
-                <input type="email" id="forgotEmail" placeholder="อีเมลที่ลงทะเบียน" class="minecraft-input" required>
+                <label for="forgotEmail" class="block text-gray-700">อีเมล:</label>
+                <input type="email" id="forgotEmail" placeholder="อีเมลที่ลงทะเบียน" class="official-input" required>
 
-                <button type="submit" class="minecraft-button w-full">ส่งลิงก์เปลี่ยนรหัสผ่าน</button>
-                <p class="text-center text-stone-300 mt-4">
-                    <a href="#" id="backToLoginFromForgotLink" class="text-green-400 hover:underline">กลับไปหน้าเข้าสู่ระบบ</a>
+                <button type="submit" class="official-button w-full">ส่งลิงก์เปลี่ยนรหัสผ่าน</button>
+                <p class="text-center text-gray-600 mt-4">
+                    <a href="#" id="backToLoginFromForgotLink" class="text-blue-600 hover:underline">กลับไปหน้าเข้าสู่ระบบ</a>
                 </p>
-                <div id="forgotPasswordMessage" class="text-red-400 text-center mt-4"></div>
+                <div id="forgotPasswordMessage" class="text-red-600 text-center mt-4"></div>
             </form>
         </div>
 
         <!-- Dashboard View -->
         <div id="dashboardView" class="view hidden">
-            <h1 class="minecraft-title">Dashboard</h1>
+            <h1 class="official-title">Dashboard</h1>
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
-                <p class="text-stone-200">ยินดีต้อนรับ, <span id="userEmail" class="font-bold text-green-400"></span>!</p>
+                <p class="text-gray-700">ยินดีต้อนรับ, <span id="userEmail" class="font-bold text-emerald-700"></span>!</p>
                 <div class="flex space-x-4">
-                    <button id="goToFormBtn" class="minecraft-button-secondary">กรอกข้อมูลสวัสดิการ</button>
-                    <button id="logoutBtn" class="minecraft-button-danger">ออกจากระบบ</button>
+                    <button id="goToFormBtn" class="official-button-secondary">กรอกข้อมูลสวัสดิการ</button>
+                    <button id="logoutBtn" class="official-button-danger">ออกจากระบบ</button>
                 </div>
             </div>
 
             <!-- User Profile Section -->
-            <div class="minecraft-fieldset mb-6">
-                <legend class="minecraft-legend">ข้อมูลโปรไฟล์</legend>
+            <div class="official-fieldset mb-6">
+                <legend class="official-legend">ข้อมูลโปรไฟล์</legend>
                 <div class="space-y-2">
-                    <p class="text-stone-200">UID: <span id="userUid" class="font-mono text-green-300 text-sm"></span></p>
-                    <p class="text-stone-200">อีเมล: <span id="profileEmail" class="text-green-300"></span></p>
-                    <label for="profileNationalId" class="block text-stone-200">หมายเลขบัตร ปชช.:</label>
-                    <input type="text" id="profileNationalId" placeholder="กรอกหมายเลขบัตรประชาชน" class="minecraft-input">
-                    <label for="profilePhoneNumber" class="block text-stone-200">เบอร์โทรศัพท์:</label>
-                    <input type="tel" id="profilePhoneNumber" placeholder="เช่น +66812345678" class="minecraft-input">
-                    <button id="saveProfileBtn" class="minecraft-button mt-4">บันทึกโปรไฟล์</button>
-                    <div id="profileMessage" class="text-red-400 mt-2"></div>
+                    <p class="text-gray-700">UID: <span id="userUid" class="font-mono text-blue-700 text-sm"></span></p>
+                    <p class="text-gray-700">อีเมล: <span id="profileEmail" class="text-blue-700"></span></p>
+                    <label for="profileNationalId" class="block text-gray-700">หมายเลขบัตร ปชช.:</label>
+                    <input type="text" id="profileNationalId" placeholder="กรอกหมายเลขบัตรประชาชน" class="official-input">
+                    <label for="profilePhoneNumber" class="block text-gray-700">เบอร์โทรศัพท์:</label>
+                    <input type="tel" id="profilePhoneNumber" placeholder="เช่น +66812345678" class="official-input">
+                    <button id="saveProfileBtn" class="official-button mt-4">บันทึกโปรไฟล์</button>
+                    <div id="profileMessage" class="text-red-600 mt-2"></div>
                 </div>
             </div>
 
             <!-- Dashboard Charts -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="minecraft-card">
-                    <h3 class="text-xl font-bold text-green-300 mb-4">สถานะกำลังพล</h3>
+                <div class="official-card">
+                    <h3 class="text-xl font-bold text-blue-700 mb-4">สถานะกำลังพล</h3>
                     <canvas id="statusChart"></canvas>
                 </div>
-                <div class="minecraft-card">
-                    <h3 class="text-xl font-bold text-green-300 mb-4">ประเภทสวัสดิการ</h3>
+                <div class="official-card">
+                    <h3 class="text-xl font-bold text-blue-700 mb-4">ประเภทสวัสดิการ</h3>
                     <canvas id="welfareTypeChart"></canvas>
                 </div>
             </div>
 
             <!-- Simple Heatmap-like Table -->
-            <div class="minecraft-card mb-6">
-                <h3 class="text-xl font-bold text-green-300 mb-4">การกระจายสวัสดิการ (Heatmap-like)</h3>
+            <div class="official-card mb-6">
+                <h3 class="text-xl font-bold text-blue-700 mb-4">การกระจายสวัสดิการ (Heatmap-like)</h3>
                 <div class="overflow-x-auto">
-                    <table class="minecraft-table">
+                    <table class="official-table">
                         <thead>
                             <tr>
                                 <th>หน่วย</th>
@@ -231,35 +231,35 @@
 
         <!-- Form View -->
         <div id="formView" class="view hidden">
-            <h1 class="minecraft-title">กรอกข้อมูลสวัสดิการ</h1>
+            <h1 class="official-title">กรอกข้อมูลสวัสดิการ</h1>
             <form id="welfareForm" class="space-y-4">
-                <fieldset class="minecraft-fieldset">
-                    <legend class="minecraft-legend">ข้อมูลกำลังพล</legend>
-                    <label for="personnelId" class="block text-stone-200">รหัสกำลังพล:</label>
-                    <input type="text" id="personnelId" class="minecraft-input" required>
+                <fieldset class="official-fieldset">
+                    <legend class="official-legend">ข้อมูลกำลังพล</legend>
+                    <label for="personnelId" class="block text-gray-700">รหัสกำลังพล:</label>
+                    <input type="text" id="personnelId" class="official-input" required>
 
-                    <label for="personnelName" class="block text-stone-200">ชื่อ-สกุล:</label>
-                    <input type="text" id="personnelName" class="minecraft-input" required>
+                    <label for="personnelName" class="block text-gray-700">ชื่อ-สกุล:</label>
+                    <input type="text" id="personnelName" class="official-input" required>
 
-                    <label for="unit" class="block text-stone-200">สังกัดหน่วย:</label>
-                    <input type="text" id="unit" class="minecraft-input">
+                    <label for="unit" class="block text-gray-700">สังกัดหน่วย:</label>
+                    <input type="text" id="unit" class="official-input">
 
-                    <label for="status" class="block text-stone-200">สถานะกำลังพล:</label>
-                    <select id="status" class="minecraft-select">
+                    <label for="status" class="block text-gray-700">สถานะกำลังพล:</label>
+                    <select id="status" class="official-select">
                         <option value="active">ประจำการ</option>
                         <option value="retired">เกษียณ</option>
                         <option value="disabled">ทุพพลภาพ</option>
                         <option value="deceased">เสียชีวิต</option>
                     </select>
 
-                    <label for="birthDate" class="block text-stone-200">วัน/เดือน/ปีเกิด:</label>
-                    <input type="date" id="birthDate" class="minecraft-input">
+                    <label for="birthDate" class="block text-gray-700">วัน/เดือน/ปีเกิด:</label>
+                    <input type="date" id="birthDate" class="official-input">
                 </fieldset>
 
-                <fieldset class="minecraft-fieldset">
-                    <legend class="minecraft-legend">ข้อมูลสวัสดิการที่ได้รับ</legend>
-                    <label for="welfareType" class="block text-stone-200">ประเภทสวัสดิการ:</label>
-                    <select id="welfareType" class="minecraft-select">
+                <fieldset class="official-fieldset">
+                    <legend class="official-legend">ข้อมูลสวัสดิการที่ได้รับ</legend>
+                    <label for="welfareType" class="block text-gray-700">ประเภทสวัสดิการ:</label>
+                    <select id="welfareType" class="official-select">
                         <option value="pension">บำนาญ</option>
                         <option value="medical">ค่ารักษาพยาบาล</option>
                         <option value="education">ทุนการศึกษาบุตร</option>
@@ -268,22 +268,30 @@
                         <option value="other">อื่นๆ</option>
                     </select>
 
-                    <label for="welfareAmount" class="block text-stone-200">จำนวนเงิน (บาท):</label>
-                    <input type="number" id="welfareAmount" class="minecraft-input" value="0" min="0">
+                    <label for="welfareAmount" class="block text-gray-700">จำนวนเงิน (บาท):</label>
+                    <input type="number" id="welfareAmount" class="official-input" value="0" min="0">
 
-                    <label for="welfareDate" class="block text-stone-200">วันที่ได้รับ:</label>
-                    <input type="date" id="welfareDate" class="minecraft-input">
+                    <label for="welfareDate" class="block text-gray-700">วันที่ได้รับ:</label>
+                    <input type="date" id="welfareDate" class="official-input">
 
-                    <label for="notes" class="block text-stone-200">หมายเหตุ:</label>
-                    <textarea id="notes" rows="3" class="minecraft-textarea"></textarea>
+                    <label for="notes" class="block text-gray-700">หมายเหตุ:</label>
+                    <textarea id="notes" rows="3" class="official-textarea"></textarea>
 
-                    <label for="supportingDoc" class="block text-stone-200">เอกสารประกอบ (PDF/รูปภาพ):</label>
-                    <input type="file" id="supportingDoc" accept=".pdf,image/*" class="minecraft-input file:minecraft-button-secondary file:border-none file:rounded-none file:py-2 file:px-4 file:mr-4">
+                    <label for="supportingDoc" class="block text-gray-700">เอกสารประกอบ (PDF/รูปภาพ):</label>
+                    <input type="file" id="supportingDoc" accept=".pdf,image/*" class="official-input file:official-button-secondary file:border-none file:rounded-md file:py-2 file:px-4 file:mr-4">
                 </fieldset>
 
-                <button type="submit" class="minecraft-button w-full">บันทึกข้อมูลสวัสดิการ</button>
-                <button type="button" id="backToDashboardBtn" class="minecraft-button-secondary w-full mt-4">กลับ Dashboard</button>
-                <div id="formMessage" class="text-red-400 mt-4 text-center"></div>
+                <button type="submit" class="official-button w-full">บันทึกข้อมูลสวัสดิการ</button>
+                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mt-4">
+                    <button type="button" id="summarizeWelfareBtn" class="official-button-secondary w-full hidden">✨ สรุปข้อมูลสวัสดิการ</button>
+                    <button type="button" id="suggestWelfareBtn" class="official-button-secondary w-full hidden">✨ แนะนำสวัสดิการเพิ่มเติม</button>
+                </div>
+                <button type="button" id="backToDashboardBtn" class="official-button-secondary w-full mt-4">กลับ Dashboard</button>
+                <div id="formMessage" class="text-red-600 mt-4 text-center"></div>
+                <div id="llmOutput" class="mt-4 p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-800 hidden">
+                    <h3 class="font-bold text-lg mb-2">ผลลัพธ์จาก AI:</h3>
+                    <p id="llmContent"></p>
+                </div>
             </form>
         </div>
 
@@ -320,6 +328,7 @@
         const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes in milliseconds
         let recaptchaVerifier;
         let confirmationResult; // For phone auth
+        let lastSubmittedWelfareData = null; // To store data for LLM features
 
         // --- UI Elements ---
         const appContainer = document.getElementById('app');
@@ -396,6 +405,11 @@
         const supportingDocInput = document.getElementById('supportingDoc');
         const formMessage = document.getElementById('formMessage');
         const backToDashboardBtn = document.getElementById('backToDashboardBtn');
+        const summarizeWelfareBtn = document.getElementById('summarizeWelfareBtn'); // New button
+        const suggestWelfareBtn = document.getElementById('suggestWelfareBtn');     // New button
+        const llmOutputDiv = document.getElementById('llmOutput');
+        const llmContentP = document.getElementById('llmContent');
+
 
         // --- Helper Functions ---
 
@@ -453,6 +467,11 @@
                     break;
                 case 'form':
                     formView.classList.remove('hidden');
+                    // Hide LLM buttons and output when entering form view
+                    summarizeWelfareBtn.classList.add('hidden');
+                    suggestWelfareBtn.classList.add('hidden');
+                    llmOutputDiv.classList.add('hidden');
+                    llmContentP.textContent = '';
                     break;
             }
             currentView = viewName;
@@ -460,7 +479,7 @@
 
         function displayMessage(element, message, type = 'error') {
             element.textContent = message;
-            element.className = `text-center mt-4 ${type === 'error' ? 'text-red-400' : 'text-green-400'}`;
+            element.className = `text-center mt-4 ${type === 'error' ? 'text-red-600' : 'text-emerald-600'}`;
         }
 
         function resetInactivityTimer() {
@@ -474,6 +493,37 @@
                     showView('login');
                 }
             }, INACTIVITY_LIMIT);
+        }
+
+        // --- Gemini API Integration ---
+        async function callGeminiAPI(prompt) {
+            const apiKey = firebaseConfig.apiKey; // Use the same API key as Firebase
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Gemini API returned an unexpected structure:", result);
+                    return "ไม่สามารถสร้างข้อมูลได้: โครงสร้างการตอบกลับไม่ถูกต้อง";
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                return `เกิดข้อผิดพลาดในการเรียกใช้ AI: ${error.message}`;
+            }
         }
 
         // --- Firebase Authentication Handlers ---
@@ -761,6 +811,13 @@
                 displayMessage(formMessage, 'บันทึกข้อมูลสวัสดิการสำเร็จ!', 'success');
                 welfareForm.reset(); // Clear form
                 supportingDocInput.value = ''; // Clear file input
+
+                // Store the last submitted data for LLM features
+                lastSubmittedWelfareData = personnelData;
+                summarizeWelfareBtn.classList.remove('hidden');
+                suggestWelfareBtn.classList.remove('hidden');
+                llmOutputDiv.classList.add('hidden'); // Hide previous LLM output
+
             } catch (error) {
                 console.error("Form Submission Error:", error);
                 displayMessage(formMessage, `เกิดข้อผิดพลาดในการบันทึก: ${error.message}`);
@@ -768,6 +825,56 @@
                 hideLoading();
             }
         });
+
+        // --- LLM Feature Event Listeners ---
+        summarizeWelfareBtn.addEventListener('click', async () => {
+            if (!lastSubmittedWelfareData) {
+                showModal('ข้อผิดพลาด', 'ไม่พบข้อมูลสวัสดิการที่บันทึกไว้ล่าสุด', 'error');
+                return;
+            }
+
+            showLoading();
+            llmOutputDiv.classList.remove('hidden');
+            llmContentP.textContent = 'กำลังสรุปข้อมูล...';
+            llmOutputDiv.classList.remove('bg-red-100', 'text-red-700');
+            llmOutputDiv.classList.add('bg-blue-50', 'text-blue-800');
+
+            const data = lastSubmittedWelfareData;
+            const prompt = `สรุปข้อมูลสวัสดิการของกำลังพลนี้ให้กระชับและเป็นภาษาไทย:
+            รหัสกำลังพล: ${data.personnelId}
+            ชื่อ-สกุล: ${data.personnelName}
+            สังกัดหน่วย: ${data.unit}
+            สถานะ: ${data.status}
+            ประเภทสวัสดิการ: ${data.welfareType}
+            จำนวนเงิน: ${data.welfareAmount} บาท
+            วันที่ได้รับ: ${data.welfareDate ? new Date(data.welfareDate.seconds * 1000).toLocaleDateString('th-TH') : 'ไม่ระบุ'}
+            หมายเหตุ: ${data.notes || 'ไม่มี'}`;
+
+            const summary = await callGeminiAPI(prompt);
+            llmContentP.textContent = summary;
+            hideLoading();
+        });
+
+        suggestWelfareBtn.addEventListener('click', async () => {
+            if (!lastSubmittedWelfareData) {
+                showModal('ข้อผิดพลาด', 'ไม่พบข้อมูลสวัสดิการที่บันทึกไว้ล่าสุด', 'error');
+                return;
+            }
+
+            showLoading();
+            llmOutputDiv.classList.remove('hidden');
+            llmContentP.textContent = 'กำลังแนะนำสวัสดิการเพิ่มเติม...';
+            llmOutputDiv.classList.remove('bg-red-100', 'text-red-700');
+            llmOutputDiv.classList.add('bg-blue-50', 'text-blue-800');
+
+            const data = lastSubmittedWelfareData;
+            const prompt = `จากข้อมูลกำลังพลที่มีสถานะ '${data.status}' และได้รับสวัสดิการประเภท '${data.welfareType}' จำนวน ${data.welfareAmount} บาท โปรดแนะนำสวัสดิการเพิ่มเติมที่อาจเกี่ยวข้องให้ 3-5 รายการ พร้อมคำอธิบายสั้นๆ และเหตุผลที่เกี่ยวข้อง โดยใช้ภาษาไทย`;
+
+            const suggestions = await callGeminiAPI(prompt);
+            llmContentP.textContent = suggestions;
+            hideLoading();
+        });
+
 
         // --- Dashboard Data & Charts ---
         async function loadDashboardData() {
@@ -825,10 +932,10 @@
                     datasets: [{
                         data: statusValues,
                         backgroundColor: [
-                            'rgb(75, 192, 192)', // active
-                            'rgb(255, 159, 64)', // retired
-                            'rgb(255, 99, 132)', // disabled
-                            'rgb(54, 162, 235)'  // deceased
+                            'rgb(34, 197, 94)',  // emerald-500 (active)
+                            'rgb(251, 146, 60)', // orange-500 (retired)
+                            'rgb(239, 68, 68)',  // red-500 (disabled)
+                            'rgb(59, 130, 246)'  // blue-500 (deceased)
                         ],
                         hoverOffset: 4
                     }]
@@ -839,13 +946,13 @@
                     plugins: {
                         legend: {
                             labels: {
-                                color: 'rgb(209, 213, 219)' // stone-300
+                                color: 'rgb(75, 85, 99)' // gray-700
                             }
                         },
                         title: {
                             display: false,
                             text: 'สถานะกำลังพล',
-                            color: 'rgb(209, 213, 219)'
+                            color: 'rgb(75, 85, 99)'
                         }
                     }
                 }
@@ -859,8 +966,8 @@
                     datasets: [{
                         label: 'จำนวนรายการ',
                         data: welfareTypeValues,
-                        backgroundColor: 'rgb(16, 185, 129)', // green-500
-                        borderColor: 'rgb(5, 150, 105)', // green-600
+                        backgroundColor: 'rgb(37, 99, 235)', // blue-600
+                        borderColor: 'rgb(29, 78, 216)', // blue-700
                         borderWidth: 1
                     }]
                 },
@@ -870,31 +977,31 @@
                     plugins: {
                         legend: {
                             labels: {
-                                color: 'rgb(209, 213, 219)'
+                                color: 'rgb(75, 85, 99)'
                             }
                         },
                         title: {
                             display: false,
                             text: 'ประเภทสวัสดิการ',
-                            color: 'rgb(209, 213, 219)'
+                            color: 'rgb(75, 85, 99)'
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                color: 'rgb(209, 213, 219)'
+                                color: 'rgb(75, 85, 99)'
                             },
                             grid: {
-                                color: 'rgb(63, 63, 70)' // stone-700
+                                color: 'rgb(229, 231, 235)' // gray-200
                             }
                         },
                         x: {
                             ticks: {
-                                color: 'rgb(209, 213, 219)'
+                                color: 'rgb(75, 85, 99)'
                             },
                             grid: {
-                                color: 'rgb(63, 63, 70)'
+                                color: 'rgb(229, 231, 235)'
                             }
                         }
                     }
@@ -927,7 +1034,7 @@
             const sortedWelfareTypes = Array.from(allWelfareTypes).sort();
 
             // Update table header for dynamic welfare types
-            const headerRow = document.querySelector('.minecraft-table thead tr');
+            const headerRow = document.querySelector('.official-table thead tr');
             headerRow.innerHTML = '<th>หน่วย</th>' + sortedWelfareTypes.map(type => `<th>${type}</th>`).join('');
 
 
@@ -945,13 +1052,13 @@
 
                     // Apply color based on count (simple heatmap logic)
                     if (count > 5) {
-                        cell.classList.add('bg-red-700'); // High activity
+                        cell.classList.add('bg-red-200'); // High activity (light red)
                     } else if (count > 2) {
-                        cell.classList.add('bg-orange-700'); // Medium activity
+                        cell.classList.add('bg-orange-200'); // Medium activity (light orange)
                     } else if (count > 0) {
-                        cell.classList.add('bg-yellow-700'); // Low activity
+                        cell.classList.add('bg-yellow-100'); // Low activity (very light yellow)
                     } else {
-                        cell.classList.add('bg-stone-800'); // No activity
+                        cell.classList.add('bg-white'); // No activity
                     }
                     row.appendChild(cell);
                 });
