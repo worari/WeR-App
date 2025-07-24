@@ -446,6 +446,10 @@
                             'callback': (response) => {
                                 // reCAPTCHA solved, allow signInWithPhoneNumber.
                                 // You can optionally hide the reCAPTCHA container if 'size' is 'normal'
+                            },
+                            'expired-callback': () => {
+                                // Response expired. Ask user to solve reCAPTCHA again.
+                                showModal('Error', 'reCAPTCHA has expired. Please try again.', 'error');
                             }
                         });
                         recaptchaVerifier.render(); // Render it
@@ -506,13 +510,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error("Gemini API HTTP Error:", response.status, errorData);
-                    return `เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ AI: ${response.status} - ${errorData.error ? errorData.error.message : 'Unknown error'}`;
-                }
-
                 const result = await response.json();
 
                 if (result.candidates && result.candidates.length > 0 &&
@@ -521,12 +518,11 @@
                     return result.candidates[0].content.parts[0].text;
                 } else {
                     console.error("Gemini API returned an unexpected structure:", result);
-                    // Log the full result for debugging
-                    return "ไม่สามารถสร้างข้อมูลได้: โครงสร้างการตอบกลับไม่ถูกต้อง หรือไม่มีเนื้อหาที่คาดหวัง";
+                    return "ไม่สามารถสร้างข้อมูลได้: โครงสร้างการตอบกลับไม่ถูกต้อง";
                 }
             } catch (error) {
                 console.error("Error calling Gemini API:", error);
-                return `เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI: ${error.message}`;
+                return `เกิดข้อผิดพลาดในการเรียกใช้ AI: ${error.message}`;
             }
         }
 
@@ -925,4 +921,172 @@
                 acc[item.welfareType] = (acc[item.welfareType] || 0) + 1;
                 return acc;
             }, {});
-            const welfareT
+            const welfareTypeLabels = Object.keys(welfareTypeCounts);
+            const welfareTypeValues = Object.values(welfareTypeCounts);
+
+            // Status Chart (Pie Chart)
+            statusChartInstance = new Chart(statusChartCanvas, {
+                type: 'pie',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: [
+                            'rgb(34, 197, 94)',  // emerald-500 (active)
+                            'rgb(251, 146, 60)', // orange-500 (retired)
+                            'rgb(239, 68, 68)',  // red-500 (disabled)
+                            'rgb(59, 130, 246)'  // blue-500 (deceased)
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgb(75, 85, 99)' // gray-700
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'สถานะกำลังพล',
+                            color: 'rgb(75, 85, 99)'
+                        }
+                    }
+                }
+            });
+
+            // Welfare Type Chart (Bar Chart)
+            welfareTypeChartInstance = new Chart(welfareTypeChartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: welfareTypeLabels,
+                    datasets: [{
+                        label: 'จำนวนรายการ',
+                        data: welfareTypeValues,
+                        backgroundColor: 'rgb(37, 99, 235)', // blue-600
+                        borderColor: 'rgb(29, 78, 216)', // blue-700
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgb(75, 85, 99)'
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'ประเภทสวัสดิการ',
+                            color: 'rgb(75, 85, 99)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgb(75, 85, 99)'
+                            },
+                            grid: {
+                                color: 'rgb(229, 231, 235)' // gray-200
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgb(75, 85, 99)'
+                            },
+                            grid: {
+                                color: 'rgb(229, 231, 235)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderHeatmapTable(data) {
+            heatmapTableBody.innerHTML = ''; // Clear existing rows
+
+            // Aggregate data for heatmap-like table: unit vs welfare type counts
+            const unitWelfareCounts = {};
+            const allUnits = new Set();
+            const allWelfareTypes = new Set();
+
+            data.forEach(item => {
+                const unit = item.unit || 'ไม่ระบุหน่วย';
+                const welfareType = item.welfareType || 'ไม่ระบุประเภท';
+
+                allUnits.add(unit);
+                allWelfareTypes.add(welfareType);
+
+                if (!unitWelfareCounts[unit]) {
+                    unitWelfareCounts[unit] = {};
+                }
+                unitWelfareCounts[unit][welfareType] = (unitWelfareCounts[unit][welfareType] || 0) + 1;
+            });
+
+            const sortedUnits = Array.from(allUnits).sort();
+            const sortedWelfareTypes = Array.from(allWelfareTypes).sort();
+
+            // Update table header for dynamic welfare types
+            const headerRow = document.querySelector('.official-table thead tr');
+            headerRow.innerHTML = '<th>หน่วย</th>' + sortedWelfareTypes.map(type => `<th>${type}</th>`).join('');
+
+
+            // Populate table body
+            sortedUnits.forEach(unit => {
+                const row = document.createElement('tr');
+                const unitCell = document.createElement('td');
+                unitCell.textContent = unit;
+                row.appendChild(unitCell);
+
+                sortedWelfareTypes.forEach(type => {
+                    const count = unitWelfareCounts[unit] && unitWelfareCounts[unit][type] ? unitWelfareCounts[unit][type] : 0;
+                    const cell = document.createElement('td');
+                    cell.textContent = count;
+
+                    // Apply color based on count (simple heatmap logic)
+                    if (count > 5) {
+                        cell.classList.add('bg-red-200'); // High activity (light red)
+                    } else if (count > 2) {
+                        cell.classList.add('bg-orange-200'); // Medium activity (light orange)
+                    } else if (count > 0) {
+                        cell.classList.add('bg-yellow-100'); // Low activity (very light yellow)
+                    } else {
+                        cell.classList.add('bg-white'); // No activity
+                    }
+                    row.appendChild(cell);
+                });
+                heatmapTableBody.appendChild(row);
+            });
+        }
+
+
+        // --- Event Listeners for View Navigation ---
+        registerLink.addEventListener('click', (e) => { e.preventDefault(); showView('register'); });
+        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); showView('forgotPassword'); });
+        backToLoginLink.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
+        backToLoginFromForgotLink.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
+        goToFormBtn.addEventListener('click', () => showView('form'));
+        backToDashboardBtn.addEventListener('click', () => showView('dashboard'));
+        modalCloseBtn.addEventListener('click', hideModal);
+
+        // --- Initial Load ---
+        // onAuthStateChanged will handle the initial view based on login status
+        // Add event listeners for inactivity timer
+        ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
+            document.addEventListener(event, resetInactivityTimer);
+        });
+        // Initial call to set up the timer if already logged in (e.g., page refresh)
+        if (auth.currentUser) {
+            resetInactivityTimer();
+        }
+
+    </script>
+</body>
+</html>
