@@ -458,6 +458,34 @@
             }, 600000); 
         };
 
+        // --- UI Setup for Logged-In User ---
+        function setupUIForUser(user, userData) {
+            currentUserRole = userData.role;
+            userNameSidebar.textContent = userData.name || user.email;
+            userRoleSidebar.textContent = userData.role;
+            
+            // Role-based UI updates
+            adminMenuLink.classList.add('hidden'); // Hide by default
+            if (currentUserRole === 'แอดมิน') {
+                adminMenuLink.classList.remove('hidden');
+            }
+
+            // Show app, hide login
+            loginPage.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            
+            // Setup listeners for data
+            setupDashboardListeners();
+            if (currentUserRole === 'แอดมิน') {
+                setupAdminListeners();
+            }
+
+            // Start inactivity timer
+            window.addEventListener('mousemove', resetInactivityTimer);
+            window.addEventListener('keydown', resetInactivityTimer);
+            resetInactivityTimer();
+        }
+
         // --- Auth State Change Handler ---
         onAuthStateChanged(auth, async (user) => {
             showLoading();
@@ -468,35 +496,9 @@
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    currentUserRole = userData.role;
-                    userNameSidebar.textContent = userData.name || user.email;
-                    userRoleSidebar.textContent = userData.role;
-                    
-                    // Role-based UI updates
-                    if (currentUserRole === 'แอดมิน') {
-                        adminMenuLink.classList.remove('hidden');
-                    } else {
-                        adminMenuLink.classList.add('hidden');
-                    }
-
-                    // Show app, hide login
-                    loginPage.classList.add('hidden');
-                    appContainer.classList.remove('hidden');
-                    
-                    // Setup listeners for data
-                    setupDashboardListeners();
-                    if (currentUserRole === 'แอดมิน') {
-                        setupAdminListeners();
-                    }
-
-                    // Start inactivity timer
-                    window.addEventListener('mousemove', resetInactivityTimer);
-                    window.addEventListener('keydown', resetInactivityTimer);
-                    resetInactivityTimer();
-
+                    setupUIForUser(user, userData);
                 } else {
-                    // This is a new user (e.g., from Google Sign-In)
-                    // Create a default user profile
+                    // This is a new user (e.g., from Google Sign-In), create a default profile
                     const newUserProfile = {
                         email: user.email,
                         name: user.displayName || 'New User',
@@ -504,8 +506,8 @@
                         createdAt: new Date()
                     };
                     await setDoc(userDocRef, newUserProfile);
-                    // Rerun auth logic to get the new profile
-                    onAuthStateChanged(auth, auth.currentUser); 
+                    // Now that the profile is created, set up the UI for the new user
+                    setupUIForUser(user, newUserProfile);
                 }
             } else {
                 // User is signed out
