@@ -3,309 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบประมาณการสิทธิและสวัสดิการกำลังพล ทบ.</title>
-    <!-- Tailwind CSS CDN -->
+    <title>ระบบประมาณการสิทธิและสวัสดิการกำลังพล</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
+    
+    <!-- Chart.js for Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font Awesome for icons (e.g., loading spinner) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts: Press Start 2P (Minecraft-like font) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles for Minecraft Theme -->
     <style>
-        /* Official/Formal Theme Styles (Green, Blue, Orange) */
         body {
-            font-family: 'Inter', sans-serif; /* Fallback to sans-serif if Inter is not loaded */
-            @apply bg-gray-100 text-gray-800; /* Light gray background, dark text */
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            background-color: #3A3A3A; /* Dark stone color */
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
         }
-        .official-container {
-            @apply bg-white border border-blue-200 shadow-lg p-6 md:p-8 rounded-lg; /* Rounded container with subtle border */
+        .font-minecraft {
+            font-family: 'Press Start 2P', cursive;
         }
-        .official-input, .official-textarea, .official-select {
-            @apply bg-white text-gray-800 border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md p-2 w-full; /* Rounded inputs with subtle borders */
+        .mc-card {
+            background-color: #C6C6C6; /* Light stone color */
+            border: 4px solid #585858; /* Darker stone border */
+            box-shadow: inset 0 0 0 4px #8A8A8A; /* Inner border */
         }
-        .official-button {
-            @apply bg-emerald-700 text-white font-semibold py-3 px-6 rounded-md shadow-md hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-150 ease-in-out; /* Professional green button */
+        .mc-button {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #7B7B7B;
+            border: 4px solid #373737;
+            color: #FFFFFF;
+            text-shadow: 2px 2px #373737;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.1s ease-in-out;
         }
-        .official-button-secondary {
-            @apply bg-blue-600 text-white font-semibold py-3 px-6 rounded-md shadow-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 transition-all duration-150 ease-in-out; /* Professional blue secondary button */
+        .mc-button:hover {
+            background-color: #8A8A8A;
         }
-        .official-button-danger {
-            @apply bg-red-600 text-white font-semibold py-3 px-6 rounded-md shadow-md hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 transition-all duration-150 ease-in-out; /* Professional red danger button */
+        .mc-button:active {
+            background-color: #6C6C6C;
+            transform: translateY(2px);
+            box-shadow: none;
         }
-        .official-title {
-            @apply text-3xl md:text-4xl font-extrabold text-blue-800 mb-6 text-center border-b-2 border-blue-400 pb-2; /* Official blue title */
+        .mc-button-primary {
+            background-color: #5C945C; /* Green like grass block */
+            border-color: #3E623E;
+            text-shadow: 2px 2px #3E623E;
         }
-        .official-fieldset {
-            @apply border border-gray-300 p-4 mb-6 rounded-lg bg-gray-50; /* Rounded fieldset with light background */
-        }
-        .official-legend {
-            @apply text-xl font-bold text-blue-700 px-2 -ml-2 bg-white border border-gray-300 rounded-md; /* Official blue legend */
-        }
-        .official-card {
-            @apply bg-white border border-gray-200 p-4 rounded-lg shadow-sm; /* Clean card style */
-        }
-        .official-table {
-            @apply w-full text-left border-collapse;
-        }
-        .official-table th, .official-table td {
-            @apply border border-gray-300 p-2;
-        }
-        .official-table th {
-            @apply bg-blue-100 text-blue-800 font-semibold;
-        }
-        .official-table td {
-            @apply bg-white text-gray-800;
-        }
+        .mc-button-primary:hover { background-color: #6DAA6D; }
+        .mc-button-primary:active { background-color: #4F804F; }
 
-        /* Modal styles */
-        .modal-overlay {
-            @apply fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50;
+        .mc-button-danger {
+            background-color: #C04F4F; /* Red like TNT */
+            border-color: #803535;
+            text-shadow: 2px 2px #803535;
         }
-        .modal-content {
-            @apply official-container w-11/12 md:w-1/2 lg:w-1/3;
-        }
-        .modal-header {
-            @apply text-xl font-bold text-blue-700 mb-4 border-b-2 border-blue-400 pb-2;
-        }
-        .modal-body {
-            @apply mb-6 text-gray-700;
-        }
-        .modal-footer {
-            @apply flex justify-end space-x-4;
-        }
-        .modal-close-btn {
-            @apply official-button-secondary;
-        }
+        .mc-button-danger:hover { background-color: #D05F5F; }
+        .mc-button-danger:active { background-color: #B03F3F; }
 
-        /* Loading spinner */
-        .loading-spinner {
-            @apply absolute inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50;
+        .mc-input {
+            background-color: #8A8A8A;
+            border: 4px solid #585858;
+            color: #FFFFFF;
+            padding: 10px;
+        }
+        .mc-input::placeholder {
+            color: #D3D3D3;
+        }
+        .mc-table {
+            border: 4px solid #585858;
+        }
+        .mc-table th, .mc-table td {
+            border: 2px solid #585858;
+            padding: 8px;
+            background-color: #C6C6C6;
+        }
+        .mc-table th {
+            background-color: #8A8A8A;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+        }
+        /* Hide scrollbar but allow scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="text-gray-800">
 
     <!-- Loading Spinner -->
-    <div id="loadingSpinner" class="loading-spinner hidden">
-        <i class="fas fa-spinner fa-spin text-blue-500 text-6xl"></i>
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex-col items-center justify-center hidden">
+        <div class="w-16 h-16 border-8 border-dashed rounded-full animate-spin border-green-500"></div>
+        <p class="font-minecraft text-white text-lg mt-4">Loading...</p>
     </div>
 
-    <!-- Custom Alert Modal -->
-    <div id="customModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header" id="modalHeader"></div>
-            <div class="modal-body" id="modalBody"></div>
-            <div class="modal-footer">
-                <button id="modalCloseBtn" class="official-button-secondary modal-close-btn">ปิด</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main App Container -->
-    <div id="app" class="official-container w-full max-w-4xl">
-
-        <!-- Login View -->
-        <div id="loginView" class="view">
-            <h1 class="official-title">เข้าสู่ระบบ</h1>
-            <form id="loginForm" class="space-y-4">
-                <label for="loginEmail" class="block text-gray-700">อีเมล:</label>
-                <input type="email" id="loginEmail" placeholder="อีเมล" class="official-input" required>
-
-                <label for="loginPassword" class="block text-gray-700">รหัสผ่าน:</label>
-                <input type="password" id="loginPassword" placeholder="รหัสผ่าน" class="official-input" required>
-
-                <button type="submit" class="official-button w-full">เข้าสู่ระบบ</button>
-                <button type="button" id="googleLoginBtn" class="official-button-secondary w-full flex items-center justify-center space-x-2">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
-                    <span>เข้าสู่ระบบด้วย Google</span>
-                </button>
-                <div id="recaptcha-container-login" class="mt-4"></div>
-                <label for="loginPhone" class="block text-gray-700 mt-4">เบอร์โทรศัพท์ (สำหรับเข้าสู่ระบบ):</label>
-                <input type="tel" id="loginPhone" placeholder="เช่น +66812345678" class="official-input">
-                <button type="button" id="phoneLoginBtn" class="official-button-secondary w-full">เข้าสู่ระบบด้วยเบอร์โทรศัพท์</button>
-                <input type="text" id="phoneOtpInput" placeholder="รหัส OTP" class="official-input hidden mt-2">
-                <button type="button" id="verifyOtpBtn" class="official-button w-full hidden mt-2">ยืนยัน OTP</button>
-
-
-                <p class="text-center text-gray-600 mt-4">
-                    <a href="#" id="forgotPasswordLink" class="text-blue-600 hover:underline">ลืมรหัสผ่าน?</a> |
-                    <a href="#" id="registerLink" class="text-blue-600 hover:underline">ลงทะเบียน</a>
-                </p>
-                <div id="loginMessage" class="text-red-600 text-center mt-4"></div>
-            </form>
-        </div>
-
-        <!-- Register View -->
-        <div id="registerView" class="view hidden">
-            <h1 class="official-title">ลงทะเบียน</h1>
-            <form id="registerForm" class="space-y-4">
-                <label for="registerEmail" class="block text-gray-700">อีเมล:</label>
-                <input type="email" id="registerEmail" placeholder="อีเมล" class="official-input" required>
-
-                <label for="registerPassword" class="block text-gray-700">รหัสผ่าน:</label>
-                <input type="password" id="registerPassword" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" class="official-input" required>
-
-                <label for="registerPhone" class="block text-gray-700 mt-4">เบอร์โทรศัพท์ (ไม่บังคับ):</label>
-                <input type="tel" id="registerPhone" placeholder="เช่น +66812345678" class="official-input">
-
-                <button type="submit" class="official-button w-full">ลงทะเบียน</button>
-                <p class="text-center text-gray-600 mt-4">
-                    <a href="#" id="backToLoginLink" class="text-blue-600 hover:underline">กลับไปหน้าเข้าสู่ระบบ</a>
-                </p>
-                <div id="registerMessage" class="text-red-600 text-center mt-4"></div>
-            </form>
-        </div>
-
-        <!-- Forgot Password View -->
-        <div id="forgotPasswordView" class="view hidden">
-            <h1 class="official-title">ลืมรหัสผ่าน</h1>
-            <form id="forgotPasswordForm" class="space-y-4">
-                <label for="forgotEmail" class="block text-gray-700">อีเมล:</label>
-                <input type="email" id="forgotEmail" placeholder="อีเมลที่ลงทะเบียน" class="official-input" required>
-
-                <button type="submit" class="official-button w-full">ส่งลิงก์เปลี่ยนรหัสผ่าน</button>
-                <p class="text-center text-gray-600 mt-4">
-                    <a href="#" id="backToLoginFromForgotLink" class="text-blue-600 hover:underline">กลับไปหน้าเข้าสู่ระบบ</a>
-                </p>
-                <div id="forgotPasswordMessage" class="text-red-600 text-center mt-4"></div>
-            </form>
-        </div>
-
-        <!-- Dashboard View -->
-        <div id="dashboardView" class="view hidden">
-            <h1 class="official-title">Dashboard</h1>
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0 md:space-x-4">
-                <p class="text-gray-700">ยินดีต้อนรับ, <span id="userEmail" class="font-bold text-emerald-700"></span>!</p>
-                <div class="flex space-x-4">
-                    <button id="goToFormBtn" class="official-button-secondary">กรอกข้อมูลสวัสดิการ</button>
-                    <button id="logoutBtn" class="official-button-danger">ออกจากระบบ</button>
+    <!-- Login Page -->
+    <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            <h1 class="font-minecraft text-3xl text-center text-white text-shadow mb-6" style="text-shadow: 4px 4px #22c55e;">Welfare System</h1>
+            <div class="mc-card p-8 space-y-6">
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label for="login-email" class="block font-minecraft text-sm text-gray-700 mb-2">Email</label>
+                        <input type="email" id="login-email" class="mc-input w-full" required>
+                    </div>
+                    <div class="relative">
+                        <label for="login-password" class="block font-minecraft text-sm text-gray-700 mb-2">Password</label>
+                        <input type="password" id="login-password" class="mc-input w-full" required>
+                        <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 top-7 px-3 flex items-center text-white">
+                            <!-- Eye icon will be handled by JS -->
+                            <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 1.274-4.057 5.064-7 9.542-7 .847 0 1.67.111 2.458.325M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 2l20 20" /></svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="mc-button mc-button-primary w-full">Login</button>
+                </form>
+                <div class="text-center">
+                    <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">ลืมรหัสผ่าน ?</a>
                 </div>
-            </div>
-
-            <!-- User Profile Section -->
-            <div class="official-fieldset mb-6">
-                <legend class="official-legend">ข้อมูลโปรไฟล์</legend>
+                <div class="flex items-center my-4">
+                    <hr class="flex-grow border-t-2 border-gray-500"><span class="mx-4 font-minecraft text-gray-600">OR</span><hr class="flex-grow border-t-2 border-gray-500">
+                </div>
                 <div class="space-y-2">
-                    <p class="text-gray-700">UID: <span id="userUid" class="font-mono text-blue-700 text-sm"></span></p>
-                    <p class="text-gray-700">อีเมล: <span id="profileEmail" class="text-blue-700"></span></p>
-                    <label for="profileNationalId" class="block text-gray-700">หมายเลขบัตร ปชช.:</label>
-                    <input type="text" id="profileNationalId" placeholder="กรอกหมายเลขบัตรประชาชน" class="official-input">
-                    <label for="profilePhoneNumber" class="block text-gray-700">เบอร์โทรศัพท์:</label>
-                    <input type="tel" id="profilePhoneNumber" placeholder="เช่น +66812345678" class="official-input">
-                    <button id="saveProfileBtn" class="official-button mt-4">บันทึกโปรไฟล์</button>
-                    <div id="profileMessage" class="text-red-600 mt-2"></div>
+                    <button id="google-login-btn" class="mc-button w-full flex items-center justify-center">
+                        <img src="https://placehold.co/24x24/FFFFFF/000000?text=G" class="w-6 h-6 mr-2" alt="Google Icon">
+                        Login with Google
+                    </button>
+                    <!-- Phone login can be added here if needed -->
                 </div>
-            </div>
-
-            <!-- Dashboard Charts -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="official-card">
-                    <h3 class="text-xl font-bold text-blue-700 mb-4">สถานะกำลังพล</h3>
-                    <canvas id="statusChart"></canvas>
-                </div>
-                <div class="official-card">
-                    <h3 class="text-xl font-bold text-blue-700 mb-4">ประเภทสวัสดิการ</h3>
-                    <canvas id="welfareTypeChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Simple Heatmap-like Table -->
-            <div class="official-card mb-6">
-                <h3 class="text-xl font-bold text-blue-700 mb-4">การกระจายสวัสดิการ (Heatmap-like)</h3>
-                <div class="overflow-x-auto">
-                    <table class="official-table">
-                        <thead>
-                            <tr>
-                                <th>หน่วย</th>
-                                <th>สวัสดิการ A</th>
-                                <th>สวัสดิการ B</th>
-                                <th>สวัสดิการ C</th>
-                            </tr>
-                        </thead>
-                        <tbody id="heatmapTableBody">
-                            <!-- Data will be populated by JS -->
-                        </tbody>
-                    </table>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-700">ยังไม่มีบัญชี? <a href="#" id="register-link" class="text-blue-600 hover:underline font-bold">ลงทะเบียนที่นี่</a></p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Form View -->
-        <div id="formView" class="view hidden">
-            <h1 class="official-title">กรอกข้อมูลสวัสดิการ</h1>
-            <form id="welfareForm" class="space-y-4">
-                <fieldset class="official-fieldset">
-                    <legend class="official-legend">ข้อมูลกำลังพล</legend>
-                    <label for="personnelId" class="block text-gray-700">รหัสกำลังพล:</label>
-                    <input type="text" id="personnelId" class="official-input" required>
-
-                    <label for="personnelName" class="block text-gray-700">ชื่อ-สกุล:</label>
-                    <input type="text" id="personnelName" class="official-input" required>
-
-                    <label for="unit" class="block text-gray-700">สังกัดหน่วย:</label>
-                    <input type="text" id="unit" class="official-input">
-
-                    <label for="status" class="block text-gray-700">สถานะกำลังพล:</label>
-                    <select id="status" class="official-select">
-                        <option value="active">ประจำการ</option>
-                        <option value="retired">เกษียณ</option>
-                        <option value="disabled">ทุพพลภาพ</option>
-                        <option value="deceased">เสียชีวิต</option>
-                    </select>
-
-                    <label for="birthDate" class="block text-gray-700">วัน/เดือน/ปีเกิด:</label>
-                    <input type="date" id="birthDate" class="official-input">
-                </fieldset>
-
-                <fieldset class="official-fieldset">
-                    <legend class="official-legend">ข้อมูลสวัสดิการที่ได้รับ</legend>
-                    <label for="welfareType" class="block text-gray-700">ประเภทสวัสดิการ:</label>
-                    <select id="welfareType" class="official-select">
-                        <option value="pension">บำนาญ</option>
-                        <option value="medical">ค่ารักษาพยาบาล</option>
-                        <option value="education">ทุนการศึกษาบุตร</option>
-                        <option value="housing">สวัสดิการที่อยู่อาศัย</option>
-                        <option value="disability">เงินช่วยเหลือทุพพลภาพ</option>
-                        <option value="other">อื่นๆ</option>
-                    </select>
-
-                    <label for="welfareAmount" class="block text-gray-700">จำนวนเงิน (บาท):</label>
-                    <input type="number" id="welfareAmount" class="official-input" value="0" min="0">
-
-                    <label for="welfareDate" class="block text-gray-700">วันที่ได้รับ:</label>
-                    <input type="date" id="welfareDate" class="official-input">
-
-                    <label for="notes" class="block text-gray-700">หมายเหตุ:</label>
-                    <textarea id="notes" rows="3" class="official-textarea"></textarea>
-
-                    <label for="supportingDoc" class="block text-gray-700">เอกสารประกอบ (PDF/รูปภาพ):</label>
-                    <input type="file" id="supportingDoc" accept=".pdf,image/*" class="official-input file:official-button-secondary file:border-none file:rounded-md file:py-2 file:px-4 file:mr-4">
-                </fieldset>
-
-                <button type="submit" class="official-button w-full">บันทึกข้อมูลสวัสดิการ</button>
-                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mt-4">
-                    <button type="button" id="summarizeWelfareBtn" class="official-button-secondary w-full hidden">✨ สรุปข้อมูลสวัสดิการ</button>
-                    <button type="button" id="suggestWelfareBtn" class="official-button-secondary w-full hidden">✨ แนะนำสวัสดิการเพิ่มเติม</button>
+    <!-- Main Application Container -->
+    <div id="app-container" class="hidden">
+        <div class="flex h-screen bg-gray-200">
+            <!-- Sidebar -->
+            <div id="sidebar" class="fixed inset-y-0 left-0 bg-[#8B4513] text-white w-64 space-y-6 py-7 px-2 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-30" style="background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');">
+                <div class="px-4">
+                    <h2 class="font-minecraft text-2xl text-center text-yellow-300" style="text-shadow: 2px 2px #5a2d0c;">Welfare</h2>
                 </div>
-                <button type="button" id="backToDashboardBtn" class="official-button-secondary w-full mt-4">กลับ Dashboard</button>
-                <div id="formMessage" class="text-red-600 mt-4 text-center"></div>
-                <div id="llmOutput" class="mt-4 p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-800 hidden">
-                    <h3 class="font-bold text-lg mb-2">ผลลัพธ์จาก AI:</h3>
-                    <p id="llmContent"></p>
+
+                <div class="px-4 py-3 mc-card bg-opacity-20">
+                    <p id="user-name-sidebar" class="font-bold text-lg">Username</p>
+                    <p id="user-role-sidebar" class="text-sm text-yellow-200">Role</p>
+                </div>
+
+                <nav>
+                    <a href="#" data-view="dashboard-view" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-yellow-400 hover:text-black bg-yellow-300 text-black">
+                        <span class="font-minecraft text-sm">รายงาน (Dashboard)</span>
+                    </a>
+                    <a href="#" data-view="require-view" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-yellow-400 hover:text-black">
+                        <span class="font-minecraft text-sm">ยื่นขอรับรอง</span>
+                    </a>
+                    <a href="#" data-view="status-view" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-yellow-400 hover:text-black">
+                        <span class="font-minecraft text-sm">ติดตามสถานะ</span>
+                    </a>
+                    <a href="#" data-view="certify-view" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-yellow-400 hover:text-black">
+                        <span class="font-minecraft text-sm">รับรองเวลาราชการ</span>
+                    </a>
+                    <a href="#" id="admin-menu-link" data-view="admin-view" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-yellow-400 hover:text-black hidden">
+                        <span class="font-minecraft text-sm">จัดการผู้ใช้งาน</span>
+                    </a>
+                </nav>
+
+                <div class="absolute bottom-0 w-full left-0 p-4">
+                    <button id="logout-btn" class="mc-button mc-button-danger w-full">Logout</button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Top Navbar -->
+                <header class="flex justify-between items-center p-4 bg-[#C6C6C6] border-b-4 border-[#585858]">
+                    <div class="flex items-center">
+                         <button id="sidebar-toggle" class="md:hidden mr-4 text-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </button>
+                        <h1 id="page-title" class="font-minecraft text-xl text-gray-800">Dashboard</h1>
+                    </div>
+                </header>
+
+                <!-- Content Area -->
+                <main id="main-content" class="flex-1 overflow-x-hidden overflow-y-auto bg-[#3A3A3A] p-4 md:p-8" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');">
+                    
+                    <!-- Dashboard View -->
+                    <div id="dashboard-view" class="content-view">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="mc-card p-6 text-center">
+                                <h3 class="font-minecraft text-lg text-blue-700">จำนวนเรื่องทั้งหมด</h3>
+                                <p id="total-requests" class="font-minecraft text-4xl mt-2">0</p>
+                            </div>
+                            <div class="mc-card p-6 text-center">
+                                <h3 class="font-minecraft text-lg text-yellow-700">รอพิจารณา</h3>
+                                <p id="pending-requests" class="font-minecraft text-4xl mt-2">0</p>
+                            </div>
+                            <div class="mc-card p-6 text-center">
+                                <h3 class="font-minecraft text-lg text-green-700">รับรองแล้ว</h3>
+                                <p id="approved-requests" class="font-minecraft text-4xl mt-2">0</p>
+                            </div>
+                        </div>
+                        <div class="mc-card p-6">
+                            <canvas id="requestsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Admin View -->
+                    <div id="admin-view" class="content-view hidden">
+                        <div class="mc-card p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="font-minecraft text-xl">จัดการผู้ใช้งาน</h2>
+                                <button id="add-user-btn" class="mc-button mc-button-primary text-sm">Add User</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full mc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Email</th>
+                                            <th>ชื่อ</th>
+                                            <th>บทบาท</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="user-table-body">
+                                        <!-- User rows will be injected here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other Views (Placeholders) -->
+                    <div id="require-view" class="content-view hidden"><div class="mc-card p-6"><h2 class="font-minecraft text-xl">ยื่นขอรับรอง</h2><p>ส่วนนี้สำหรับค้นหา เพิ่ม, แก้ไข, ลบข้อมูล พร้อมรายละเอียด และพิมพ์เอกสาร</p></div></div>
+                    <div id="status-view" class="content-view hidden"><div class="mc-card p-6"><h2 class="font-minecraft text-xl">ติดตามสถานะ</h2><p>ส่วนนี้สำหรับติดตามสถานะคำร้อง</p></div></div>
+                    <div id="certify-view" class="content-view hidden"><div class="mc-card p-6"><h2 class="font-minecraft text-xl">รับรองเวลาราชการ</h2><p>ส่วนนี้สำหรับผู้ตรวจสอบและผู้บังคับบัญชา</p></div></div>
+
+                </main>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-60 z-40 hidden"></div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4">
+        <div class="mc-card w-full max-w-md p-8">
+            <h2 class="font-minecraft text-2xl mb-6 text-center">ลงทะเบียน</h2>
+            <form id="register-form" class="space-y-4">
+                 <div>
+                    <label class="block font-minecraft text-sm text-gray-700 mb-2">ชื่อ-สกุล</label>
+                    <input type="text" id="register-name" class="mc-input w-full" required>
+                </div>
+                <div>
+                    <label class="block font-minecraft text-sm text-gray-700 mb-2">Email</label>
+                    <input type="email" id="register-email" class="mc-input w-full" required>
+                </div>
+                <div>
+                    <label class="block font-minecraft text-sm text-gray-700 mb-2">Password</label>
+                    <input type="password" id="register-password" class="mc-input w-full" required minlength="6">
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" class="mc-button close-modal-btn">Cancel</button>
+                    <button type="submit" class="mc-button mc-button-primary">Register</button>
                 </div>
             </form>
         </div>
-
+    </div>
+    
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4">
+        <div class="mc-card w-full max-w-md p-8">
+            <h2 class="font-minecraft text-2xl mb-6 text-center">รีเซ็ตรหัสผ่าน</h2>
+            <form id="forgot-password-form" class="space-y-4">
+                <p class="text-sm text-center">กรอกอีเมลของคุณเพื่อรับลิงก์สำหรับรีเซ็ตรหัสผ่าน</p>
+                <div>
+                    <label class="block font-minecraft text-sm text-gray-700 mb-2">Email</label>
+                    <input type="email" id="reset-email" class="mc-input w-full" required>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" class="mc-button close-modal-btn">Cancel</button>
+                    <button type="submit" class="mc-button mc-button-primary">Send Reset Link</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; // Use 10.12.2 for consistency
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    <!-- User Form Modal (Add/Edit) -->
+    <div id="user-form-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4">
+        <div class="mc-card w-full max-w-lg p-8">
+            <h2 id="user-form-title" class="font-minecraft text-2xl mb-6 text-center">Add User</h2>
+            <form id="user-form" class="space-y-4">
+                <input type="hidden" id="user-id">
+                <div>
+                    <label class="block font-minecraft text-sm text-gray-700 mb-2">Email</label>
+                    <input type="email" id="user-email" class="mc-input w-full bg-gray-500" readonly>
+                </div>
+                 <div>
+                    <label class="block font-minecraft text-sm text-gray-700 mb-2">ชื่อ</label>
+                    <input type="text" id="user-name" class="mc-input w-full" required>
+                </div>
+                <div>
+                    <label class="block font-minecraft text-sm text-gray-700 mb-2">บทบาท</label>
+                    <select id="user-role" class="mc-input w-full" required>
+                        <option value="ผู้ใช้งาน">ผู้ใช้งาน (ยื่นเรื่อง)</option>
+                        <option value="ผู้ตรวจสอบ">ผู้ตรวจสอบ</option>
+                        <option value="ผู้บังคับบัญชา">ผู้บังคับบัญชา</option>
+                        <option value="แอดมิน">แอดมิน</option>
+                    </select>
+                </div>
+                <div id="signature-section">
+                    <label class="block font-minecraft text-sm text-gray-700 mb-2">ลายเซ็น</label>
+                    <input type="file" id="signature-upload" class="mc-input w-full text-sm" accept="image/png, image/jpeg">
+                    <div id="signature-preview-container" class="mt-2">
+                        <img id="signature-preview" src="" alt="Signature Preview" class="max-h-24 hidden border-2 border-gray-500">
+                        <p id="no-signature-text" class="text-sm">ยังไม่มีลายเซ็น</p>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" class="mc-button close-modal-btn">Cancel</button>
+                    <button type="submit" class="mc-button mc-button-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        // Your web app's Firebase configuration (provided by user)
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signInWithPopup,
+            GoogleAuthProvider,
+            sendPasswordResetEmail,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc,
+            collection,
+            onSnapshot,
+            updateDoc,
+            deleteDoc
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getStorage, 
+            ref, 
+            uploadBytes, 
+            getDownloadURL 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDQ-RXl0oCcv2m-E4UdAN0EBM23Pim-CkU",
             authDomain: "wer-rta-19abb.firebaseapp.com",
@@ -322,770 +388,446 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        // Global Variables
-        let currentView = 'login';
-        let inactivityTimeout;
-        const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes in milliseconds
-        let recaptchaVerifier;
-        let confirmationResult; // For phone auth
-        let lastSubmittedWelfareData = null; // To store data for LLM features
+        // --- DOM Elements ---
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loginPage = document.getElementById('login-page');
+        const appContainer = document.getElementById('app-container');
+        
+        // Login/Register
+        const loginForm = document.getElementById('login-form');
+        const registerLink = document.getElementById('register-link');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const togglePasswordBtn = document.getElementById('toggle-password');
+        const eyeOpen = document.getElementById('eye-open');
+        const eyeClosed = document.getElementById('eye-closed');
+        
+        // Modals
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const registerModal = document.getElementById('register-modal');
+        const forgotPasswordModal = document.getElementById('forgot-password-modal');
+        const userFormModal = document.getElementById('user-form-modal');
+        
+        // Main App UI
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const logoutBtn = document.getElementById('logout-btn');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pageTitle = document.getElementById('page-title');
+        const contentViews = document.querySelectorAll('.content-view');
+        
+        // User Info Display
+        const userNameSidebar = document.getElementById('user-name-sidebar');
+        const userRoleSidebar = document.getElementById('user-role-sidebar');
 
-        // --- UI Elements ---
-        const appContainer = document.getElementById('app');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const customModal = document.getElementById('customModal');
-        const modalHeader = document.getElementById('modalHeader');
-        const modalBody = document.getElementById('modalBody');
-        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        // Admin View
+        const adminMenuLink = document.getElementById('admin-menu-link');
+        const addUserBtn = document.getElementById('add-user-btn');
+        const userTableBody = document.getElementById('user-table-body');
+        const userForm = document.getElementById('user-form');
+        const userFormTitle = document.getElementById('user-form-title');
+        const signatureSection = document.getElementById('signature-section');
 
-        // Views
-        const loginView = document.getElementById('loginView');
-        const registerView = document.getElementById('registerView');
-        const forgotPasswordView = document.getElementById('forgotPasswordView');
-        const dashboardView = document.getElementById('dashboardView');
-        const formView = document.getElementById('formView');
+        // --- State ---
+        let currentUser = null;
+        let currentUserRole = null;
+        let inactivityTimer;
+        let requestsChart = null;
 
-        // Login Elements
-        const loginForm = document.getElementById('loginForm');
-        const loginEmailInput = document.getElementById('loginEmail');
-        const loginPasswordInput = document.getElementById('loginPassword');
-        const loginMessage = document.getElementById('loginMessage');
-        const registerLink = document.getElementById('registerLink');
-        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        const googleLoginBtn = document.getElementById('googleLoginBtn');
-        const loginPhoneInput = document.getElementById('loginPhone');
-        const phoneLoginBtn = document.getElementById('phoneLoginBtn');
-        const phoneOtpInput = document.getElementById('phoneOtpInput');
-        const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-        const recaptchaContainerLogin = document.getElementById('recaptcha-container-login');
+        // --- Utility Functions ---
+        const showLoading = () => loadingOverlay.classList.remove('hidden');
+        const hideLoading = () => loadingOverlay.classList.add('hidden');
+        
+        const showModal = (modal) => {
+            modalBackdrop.classList.remove('hidden');
+            modal.classList.remove('hidden');
+        };
 
+        const hideAllModals = () => {
+            modalBackdrop.classList.add('hidden');
+            document.querySelectorAll('.fixed.z-50').forEach(modal => modal.classList.add('hidden'));
+        };
+        
+        // --- Inactivity Logout ---
+        const resetInactivityTimer = () => {
+            clearTimeout(inactivityTimer);
+            // Set to 10 minutes (600000 ms)
+            inactivityTimer = setTimeout(() => {
+                alert('คุณไม่ได้ใช้งานเป็นเวลานาน ระบบจะทำการออกจากระบบอัตโนมัติ');
+                signOut(auth);
+            }, 600000); 
+        };
 
-        // Register Elements
-        const registerForm = document.getElementById('registerForm');
-        const registerEmailInput = document.getElementById('registerEmail');
-        const registerPasswordInput = document.getElementById('registerPassword');
-        const registerPhoneInput = document.getElementById('registerPhone');
-        const registerMessage = document.getElementById('registerMessage');
-        const backToLoginLink = document.getElementById('backToLoginLink');
-
-        // Forgot Password Elements
-        const forgotPasswordForm = document.getElementById('forgotPasswordForm');
-        const forgotEmailInput = document.getElementById('forgotEmail');
-        const forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
-        const backToLoginFromForgotLink = document.getElementById('backToLoginFromForgotLink');
-
-        // Dashboard Elements
-        const userEmailSpan = document.getElementById('userEmail');
-        const userUidSpan = document.getElementById('userUid');
-        const profileEmailInput = document.getElementById('profileEmail');
-        const profileNationalIdInput = document.getElementById('profileNationalId');
-        const profilePhoneNumberInput = document.getElementById('profilePhoneNumber');
-        const saveProfileBtn = document.getElementById('saveProfileBtn');
-        const profileMessage = document.getElementById('profileMessage');
-        const goToFormBtn = document.getElementById('goToFormBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const statusChartCanvas = document.getElementById('statusChart');
-        const welfareTypeChartCanvas = document.getElementById('welfareTypeChart');
-        const heatmapTableBody = document.getElementById('heatmapTableBody');
-        let statusChartInstance = null;
-        let welfareTypeChartInstance = null;
-
-
-        // Form Elements
-        const welfareForm = document.getElementById('welfareForm');
-        const personnelIdInput = document.getElementById('personnelId');
-        const personnelNameInput = document.getElementById('personnelName');
-        const unitInput = document.getElementById('unit');
-        const statusSelect = document.getElementById('status');
-        const birthDateInput = document.getElementById('birthDate');
-        const welfareTypeSelect = document.getElementById('welfareType');
-        const welfareAmountInput = document.getElementById('welfareAmount');
-        const welfareDateInput = document.getElementById('welfareDate');
-        const notesTextarea = document.getElementById('notes');
-        const supportingDocInput = document.getElementById('supportingDoc');
-        const formMessage = document.getElementById('formMessage');
-        const backToDashboardBtn = document.getElementById('backToDashboardBtn');
-        const summarizeWelfareBtn = document.getElementById('summarizeWelfareBtn'); // New button
-        const suggestWelfareBtn = document.getElementById('suggestWelfareBtn');     // New button
-        const llmOutputDiv = document.getElementById('llmOutput');
-        const llmContentP = document.getElementById('llmContent');
-
-
-        // --- Helper Functions ---
-
-        function showLoading() {
-            loadingSpinner.classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            loadingSpinner.classList.add('hidden');
-        }
-
-        function showModal(header, body, type = 'info') {
-            modalHeader.textContent = header;
-            modalBody.textContent = body;
-            // You can add more styling based on type if needed
-            customModal.classList.remove('hidden');
-        }
-
-        function hideModal() {
-            customModal.classList.add('hidden');
-        }
-
-        function showView(viewName) {
-            const views = [loginView, registerView, forgotPasswordView, dashboardView, formView];
-            views.forEach(view => view.classList.add('hidden'));
-
-            switch (viewName) {
-                case 'login':
-                    loginView.classList.remove('hidden');
-                    // Initialize reCAPTCHA for phone login if not already done
-                    if (!recaptchaVerifier) {
-                        recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerLogin, {
-                            'size': 'invisible', // or 'normal' if you want it visible
-                            'callback': (response) => {
-                                // reCAPTCHA solved, allow signInWithPhoneNumber.
-                                // You can optionally hide the reCAPTCHA container if 'size' is 'normal'
-                            },
-                            'expired-callback': () => {
-                                // Response expired. Ask user to solve reCAPTCHA again.
-                                showModal('Error', 'reCAPTCHA has expired. Please try again.', 'error');
-                            }
-                        });
-                        recaptchaVerifier.render(); // Render it
-                    }
-                    break;
-                case 'register':
-                    registerView.classList.remove('hidden');
-                    break;
-                case 'forgotPassword':
-                    forgotPasswordView.classList.remove('hidden');
-                    break;
-                case 'dashboard':
-                    dashboardView.classList.remove('hidden');
-                    loadDashboardData(); // Load data when dashboard is shown
-                    break;
-                case 'form':
-                    formView.classList.remove('hidden');
-                    // Hide LLM buttons and output when entering form view
-                    summarizeWelfareBtn.classList.add('hidden');
-                    suggestWelfareBtn.classList.add('hidden');
-                    llmOutputDiv.classList.add('hidden');
-                    llmContentP.textContent = '';
-                    break;
-            }
-            currentView = viewName;
-        }
-
-        function displayMessage(element, message, type = 'error') {
-            element.textContent = message;
-            element.className = `text-center mt-4 ${type === 'error' ? 'text-red-600' : 'text-emerald-600'}`;
-        }
-
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimeout);
-            inactivityTimeout = setTimeout(async () => {
-                if (auth.currentUser) {
-                    showLoading();
-                    await auth.signOut();
-                    hideLoading();
-                    showModal('Session Expired', 'คุณถูกออกจากระบบเนื่องจากไม่มีการใช้งาน', 'info');
-                    showView('login');
-                }
-            }, INACTIVITY_LIMIT);
-        }
-
-        // --- Gemini API Integration ---
-        async function callGeminiAPI(prompt) {
-            const apiKey = firebaseConfig.apiKey; // Use the same API key as Firebase
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-            let chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-            const payload = { contents: chatHistory };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    return result.candidates[0].content.parts[0].text;
-                } else {
-                    console.error("Gemini API returned an unexpected structure:", result);
-                    return "ไม่สามารถสร้างข้อมูลได้: โครงสร้างการตอบกลับไม่ถูกต้อง";
-                }
-            } catch (error) {
-                console.error("Error calling Gemini API:", error);
-                return `เกิดข้อผิดพลาดในการเรียกใช้ AI: ${error.message}`;
-            }
-        }
-
-        // --- Firebase Authentication Handlers ---
-
-        // Listen for auth state changes
+        // --- Auth State Change Handler ---
         onAuthStateChanged(auth, async (user) => {
+            showLoading();
             if (user) {
-                // User is signed in
-                userEmailSpan.textContent = user.email || user.phoneNumber || 'N/A';
-                userUidSpan.textContent = user.uid;
-                profileEmailInput.value = user.email || '';
-                profilePhoneNumberInput.value = user.phoneNumber || '';
+                currentUser = user;
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
 
-                // Fetch user profile from Firestore
-                await fetchUserProfile(user.uid);
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    currentUserRole = userData.role;
+                    userNameSidebar.textContent = userData.name || user.email;
+                    userRoleSidebar.textContent = userData.role;
+                    
+                    // Role-based UI updates
+                    if (currentUserRole === 'แอดมิน') {
+                        adminMenuLink.classList.remove('hidden');
+                    } else {
+                        adminMenuLink.classList.add('hidden');
+                    }
 
-                showView('dashboard');
-                resetInactivityTimer(); // Start timer when logged in
+                    // Show app, hide login
+                    loginPage.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                    
+                    // Setup listeners for data
+                    setupDashboardListeners();
+                    if (currentUserRole === 'แอดมิน') {
+                        setupAdminListeners();
+                    }
+
+                    // Start inactivity timer
+                    window.addEventListener('mousemove', resetInactivityTimer);
+                    window.addEventListener('keydown', resetInactivityTimer);
+                    resetInactivityTimer();
+
+                } else {
+                    // This is a new user (e.g., from Google Sign-In)
+                    // Create a default user profile
+                    const newUserProfile = {
+                        email: user.email,
+                        name: user.displayName || 'New User',
+                        role: 'ผู้ใช้งาน', // Default role
+                        createdAt: new Date()
+                    };
+                    await setDoc(userDocRef, newUserProfile);
+                    // Rerun auth logic to get the new profile
+                    onAuthStateChanged(auth, auth.currentUser); 
+                }
             } else {
                 // User is signed out
-                showView('login');
-                clearTimeout(inactivityTimeout); // Clear timer if logged out
+                currentUser = null;
+                currentUserRole = null;
+                loginPage.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                
+                // Clear inactivity timer
+                clearTimeout(inactivityTimer);
+                window.removeEventListener('mousemove', resetInactivityTimer);
+                window.removeEventListener('keydown', resetInactivityTimer);
             }
+            hideLoading();
         });
 
-        // Email/Password Login
+        // --- Authentication Logic ---
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = loginEmailInput.value;
-            const password = loginPasswordInput.value;
             showLoading();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                displayMessage(loginMessage, 'เข้าสู่ระบบสำเร็จ!', 'success');
-                // onAuthStateChanged will handle view change
             } catch (error) {
-                console.error("Login Error:", error);
-                let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    errorMessage = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
-                }
-                displayMessage(loginMessage, errorMessage);
+                alert(`Login Failed: ${error.message}`);
             } finally {
                 hideLoading();
             }
         });
 
-        // Google Login
-        googleLoginBtn.addEventListener('click', async () => {
-            const provider = new GoogleAuthProvider();
-            showLoading();
-            try {
-                await signInWithPopup(auth, provider);
-                displayMessage(loginMessage, 'เข้าสู่ระบบด้วย Google สำเร็จ!', 'success');
-                // onAuthStateChanged will handle view change
-            } catch (error) {
-                console.error("Google Login Error:", error);
-                let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google';
-                if (error.code === 'auth/popup-closed-by-user') {
-                    errorMessage = 'คุณปิดหน้าต่าง Google Login';
-                } else if (error.code === 'auth/cancelled-popup-request') {
-                    errorMessage = 'มีการร้องขอ Google Login ซ้ำซ้อน';
-                }
-                displayMessage(loginMessage, errorMessage);
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // Phone Login (Request OTP)
-        phoneLoginBtn.addEventListener('click', async () => {
-            const phoneNumber = loginPhoneInput.value;
-            if (!phoneNumber) {
-                displayMessage(loginMessage, 'กรุณากรอกเบอร์โทรศัพท์');
-                return;
-            }
-            showLoading();
-            try {
-                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
-                phoneOtpInput.classList.remove('hidden');
-                verifyOtpBtn.classList.remove('hidden');
-                phoneLoginBtn.classList.add('hidden'); // Hide request button
-                displayMessage(loginMessage, 'ส่งรหัส OTP ไปยังเบอร์โทรศัพท์ของคุณแล้ว', 'success');
-            } catch (error) {
-                console.error("Phone Login Error:", error);
-                let errorMessage = 'เกิดข้อผิดพลาดในการส่ง OTP';
-                if (error.code === 'auth/invalid-phone-number') {
-                    errorMessage = 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง (เช่น +66xxxxxxxx)';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMessage = 'มีการร้องขอ OTP มากเกินไป กรุณารอสักครู่';
-                }
-                displayMessage(loginMessage, errorMessage);
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // Phone Login (Verify OTP)
-        verifyOtpBtn.addEventListener('click', async () => {
-            const otpCode = phoneOtpInput.value;
-            if (!otpCode) {
-                displayMessage(loginMessage, 'กรุณากรอกรหัส OTP');
-                return;
-            }
-            showLoading();
-            try {
-                await confirmationResult.confirm(otpCode);
-                displayMessage(loginMessage, 'เข้าสู่ระบบด้วยเบอร์โทรศัพท์สำเร็จ!', 'success');
-                // onAuthStateChanged will handle view change
-            } catch (error) {
-                console.error("OTP Verification Error:", error);
-                let errorMessage = 'รหัส OTP ไม่ถูกต้องหรือไม่ถูกต้อง';
-                if (error.code === 'auth/invalid-verification-code') {
-                    errorMessage = 'รหัส OTP ไม่ถูกต้อง';
-                }
-                displayMessage(loginMessage, errorMessage);
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // Register
-        registerForm.addEventListener('submit', async (e) => {
+        registerLink.addEventListener('click', (e) => {
             e.preventDefault();
-            const email = registerEmailInput.value;
-            const password = registerPasswordInput.value;
-            const phoneNumber = registerPhoneInput.value;
+            showModal(registerModal);
+        });
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
             showLoading();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-
-                // Save phone number to user profile in Firestore if provided
-                if (phoneNumber) {
-                    await setDoc(doc(db, 'users', user.uid), {
-                        email: user.email,
-                        phoneNumber: phoneNumber,
-                        createdAt: serverTimestamp()
-                    }, { merge: true });
-                } else {
-                     await setDoc(doc(db, 'users', user.uid), {
-                        email: user.email,
-                        createdAt: serverTimestamp()
-                    }, { merge: true });
-                }
-
-                displayMessage(registerMessage, 'ลงทะเบียนสำเร็จ! คุณสามารถเข้าสู่ระบบได้แล้ว', 'success');
-                showView('login'); // Go back to login after registration
+                // Create user document in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    email: email,
+                    role: "ผู้ใช้งาน", // Default role for new sign-ups
+                    createdAt: new Date()
+                });
+                hideAllModals();
+                alert('ลงทะเบียนสำเร็จ!');
             } catch (error) {
-                console.error("Register Error:", error);
-                let errorMessage = 'เกิดข้อผิดพลาดในการลงทะเบียน';
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = 'รหัสผ่านอ่อนเกินไป (ต้องมีอย่างน้อย 6 ตัวอักษร)';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
-                }
-                displayMessage(registerMessage, errorMessage);
+                alert(`Registration Failed: ${error.message}`);
             } finally {
                 hideLoading();
             }
         });
 
-        // Forgot Password
-        forgotPasswordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = forgotEmailInput.value;
+        googleLoginBtn.addEventListener('click', async () => {
             showLoading();
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                alert(`Google Sign-In Failed: ${error.message}`);
+                hideLoading();
+            }
+        });
+
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal(forgotPasswordModal);
+        });
+
+        document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const email = document.getElementById('reset-email').value;
             try {
                 await sendPasswordResetEmail(auth, email);
-                displayMessage(forgotPasswordMessage, 'ส่งลิงก์เปลี่ยนรหัสผ่านไปยังอีเมลของคุณแล้ว', 'success');
+                hideAllModals();
+                alert('ลิงก์สำหรับรีเซ็ตรหัสผ่านได้ถูกส่งไปยังอีเมลของคุณแล้ว');
             } catch (error) {
-                console.error("Forgot Password Error:", error);
-                let errorMessage = 'เกิดข้อผิดพลาดในการส่งลิงก์เปลี่ยนรหัสผ่าน';
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'ไม่พบผู้ใช้ด้วยอีเมลนี้';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
-                }
-                displayMessage(forgotPasswordMessage, errorMessage);
+                alert(`Failed to send reset email: ${error.message}`);
             } finally {
                 hideLoading();
             }
         });
 
-        // Logout
-        logoutBtn.addEventListener('click', async () => {
-            showLoading();
-            try {
-                await signOut(auth);
-                displayMessage(loginMessage, 'ออกจากระบบสำเร็จ', 'success');
-                // onAuthStateChanged will handle view change
-            } catch (error) {
-                console.error("Logout Error:", error);
-                showModal('Error', 'เกิดข้อผิดพลาดในการออกจากระบบ', 'error');
-            } finally {
-                hideLoading();
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        togglePasswordBtn.addEventListener('click', () => {
+            const passwordInput = document.getElementById('login-password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+            } else {
+                passwordInput.type = 'password';
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
             }
         });
 
-        // --- User Profile Management ---
-        async function fetchUserProfile(uid) {
-            try {
-                const userDocRef = doc(db, 'users', uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    const userData = userDocSnap.data();
-                    profileNationalIdInput.value = userData.nationalId || '';
-                    profilePhoneNumberInput.value = userData.phoneNumber || '';
-                } else {
-                    // Create a basic profile if it doesn't exist
-                    await setDoc(userDocRef, {
-                        email: auth.currentUser.email,
-                        createdAt: serverTimestamp()
-                    }, { merge: true });
-                }
-            } catch (error) {
-                console.error("Error fetching user profile:", error);
-                displayMessage(profileMessage, 'เกิดข้อผิดพลาดในการดึงข้อมูลโปรไฟล์', 'error');
-            }
-        }
-
-        saveProfileBtn.addEventListener('click', async () => {
-            const user = auth.currentUser;
-            if (!user) {
-                showModal('Error', 'คุณต้องเข้าสู่ระบบก่อน', 'error');
-                return;
-            }
-            showLoading();
-            try {
-                const nationalId = profileNationalIdInput.value;
-                const phoneNumber = profilePhoneNumberInput.value;
-                await updateDoc(doc(db, 'users', user.uid), {
-                    nationalId: nationalId || null,
-                    phoneNumber: phoneNumber || null,
-                    updatedAt: serverTimestamp()
-                });
-                displayMessage(profileMessage, 'บันทึกโปรไฟล์สำเร็จ!', 'success');
-            } catch (error) {
-                console.error("Error saving profile:", error);
-                displayMessage(profileMessage, 'เกิดข้อผิดพลาดในการบันทึกโปรไฟล์', 'error');
-            } finally {
-                hideLoading();
-            }
+        // --- UI Navigation & Interaction ---
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
         });
 
-        // --- Form Submission ---
-        welfareForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const user = auth.currentUser;
-            if (!user) {
-                showModal('Error', 'คุณต้องเข้าสู่ระบบก่อนจึงจะบันทึกข้อมูลได้', 'error');
-                return;
-            }
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const viewId = link.dataset.view;
+                
+                // Update active link style
+                navLinks.forEach(l => l.classList.remove('bg-yellow-300', 'text-black'));
+                link.classList.add('bg-yellow-300', 'text-black');
 
-            showLoading();
-            try {
-                const personnelData = {
-                    personnelId: personnelIdInput.value,
-                    personnelName: personnelNameInput.value,
-                    unit: unitInput.value,
-                    status: statusSelect.value,
-                    birthDate: birthDateInput.value ? new Date(birthDateInput.value) : null,
-                    welfareType: welfareTypeSelect.value,
-                    welfareAmount: parseFloat(welfareAmountInput.value) || 0,
-                    welfareDate: welfareDateInput.value ? new Date(welfareDateInput.value) : null,
-                    notes: notesTextarea.value,
-                    userId: user.uid, // Link to the user who submitted
-                    timestamp: serverTimestamp()
-                };
+                // Show selected view
+                contentViews.forEach(view => view.classList.add('hidden'));
+                document.getElementById(viewId).classList.remove('hidden');
+                
+                // Update page title
+                pageTitle.textContent = link.querySelector('span').textContent;
 
-                // Handle file upload if a file is selected
-                const supportingDocFile = supportingDocInput.files[0];
-                if (supportingDocFile) {
-                    const storageRef = ref(storage, `supporting_documents/${user.uid}/${Date.now()}_${supportingDocFile.name}`);
-                    const uploadTask = await uploadBytes(storageRef, supportingDocFile);
-                    const downloadURL = await getDownloadURL(uploadTask.ref);
-                    personnelData.supportingDocUrl = downloadURL;
-                }
-
-                await addDoc(collection(db, 'formSubmissions'), personnelData);
-                displayMessage(formMessage, 'บันทึกข้อมูลสวัสดิการสำเร็จ!', 'success');
-                welfareForm.reset(); // Clear form
-                supportingDocInput.value = ''; // Clear file input
-
-                // Store the last submitted data for LLM features
-                lastSubmittedWelfareData = personnelData;
-                summarizeWelfareBtn.classList.remove('hidden');
-                suggestWelfareBtn.classList.remove('hidden');
-                llmOutputDiv.classList.add('hidden'); // Hide previous LLM output
-
-            } catch (error) {
-                console.error("Form Submission Error:", error);
-                displayMessage(formMessage, `เกิดข้อผิดพลาดในการบันทึก: ${error.message}`);
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // --- LLM Feature Event Listeners ---
-        summarizeWelfareBtn.addEventListener('click', async () => {
-            if (!lastSubmittedWelfareData) {
-                showModal('ข้อผิดพลาด', 'ไม่พบข้อมูลสวัสดิการที่บันทึกไว้ล่าสุด', 'error');
-                return;
-            }
-
-            showLoading();
-            llmOutputDiv.classList.remove('hidden');
-            llmContentP.textContent = 'กำลังสรุปข้อมูล...';
-            llmOutputDiv.classList.remove('bg-red-100', 'text-red-700');
-            llmOutputDiv.classList.add('bg-blue-50', 'text-blue-800');
-
-            const data = lastSubmittedWelfareData;
-            const prompt = `สรุปข้อมูลสวัสดิการของกำลังพลนี้ให้กระชับและเป็นภาษาไทย:
-            รหัสกำลังพล: ${data.personnelId}
-            ชื่อ-สกุล: ${data.personnelName}
-            สังกัดหน่วย: ${data.unit}
-            สถานะ: ${data.status}
-            ประเภทสวัสดิการ: ${data.welfareType}
-            จำนวนเงิน: ${data.welfareAmount} บาท
-            วันที่ได้รับ: ${data.welfareDate ? new Date(data.welfareDate.seconds * 1000).toLocaleDateString('th-TH') : 'ไม่ระบุ'}
-            หมายเหตุ: ${data.notes || 'ไม่มี'}`;
-
-            const summary = await callGeminiAPI(prompt);
-            llmContentP.textContent = summary;
-            hideLoading();
-        });
-
-        suggestWelfareBtn.addEventListener('click', async () => {
-            if (!lastSubmittedWelfareData) {
-                showModal('ข้อผิดพลาด', 'ไม่พบข้อมูลสวัสดิการที่บันทึกไว้ล่าสุด', 'error');
-                return;
-            }
-
-            showLoading();
-            llmOutputDiv.classList.remove('hidden');
-            llmContentP.textContent = 'กำลังแนะนำสวัสดิการเพิ่มเติม...';
-            llmOutputDiv.classList.remove('bg-red-100', 'text-red-700');
-            llmOutputDiv.classList.add('bg-blue-50', 'text-blue-800');
-
-            const data = lastSubmittedWelfareData;
-            const prompt = `จากข้อมูลกำลังพลที่มีสถานะ '${data.status}' และได้รับสวัสดิการประเภท '${data.welfareType}' จำนวน ${data.welfareAmount} บาท โปรดแนะนำสวัสดิการเพิ่มเติมที่อาจเกี่ยวข้องให้ 3-5 รายการ พร้อมคำอธิบายสั้นๆ และเหตุผลที่เกี่ยวข้อง โดยใช้ภาษาไทย`;
-
-            const suggestions = await callGeminiAPI(prompt);
-            llmContentP.textContent = suggestions;
-            hideLoading();
-        });
-
-
-        // --- Dashboard Data & Charts ---
-        async function loadDashboardData() {
-            showLoading();
-            try {
-                const q = query(collection(db, 'formSubmissions'), orderBy('timestamp', 'desc'));
-
-                onSnapshot(q, (snapshot) => {
-                    const data = [];
-                    snapshot.forEach(doc => {
-                        data.push(doc.data());
-                    });
-                    renderCharts(data);
-                    renderHeatmapTable(data);
-                    hideLoading();
-                }, (error) => {
-                    console.error("Error listening to form submissions:", error);
-                    showModal('Error', 'ไม่สามารถโหลดข้อมูล Dashboard ได้', 'error');
-                    hideLoading();
-                });
-
-            } catch (error) {
-                console.error("Error loading dashboard data:", error);
-                showModal('Error', 'เกิดข้อผิดพลาดในการโหลดข้อมูล Dashboard', 'error');
-                hideLoading();
-            }
-        }
-
-        function renderCharts(data) {
-            // Destroy existing chart instances if they exist
-            if (statusChartInstance) statusChartInstance.destroy();
-            if (welfareTypeChartInstance) welfareTypeChartInstance.destroy();
-
-            // Aggregate data for Status Chart
-            const statusCounts = data.reduce((acc, item) => {
-                acc[item.status] = (acc[item.status] || 0) + 1;
-                return acc;
-            }, {});
-            const statusLabels = Object.keys(statusCounts);
-            const statusValues = Object.values(statusCounts);
-
-            // Aggregate data for Welfare Type Chart
-            const welfareTypeCounts = data.reduce((acc, item) => {
-                acc[item.welfareType] = (acc[item.welfareType] || 0) + 1;
-                return acc;
-            }, {});
-            const welfareTypeLabels = Object.keys(welfareTypeCounts);
-            const welfareTypeValues = Object.values(welfareTypeCounts);
-
-            // Status Chart (Pie Chart)
-            statusChartInstance = new Chart(statusChartCanvas, {
-                type: 'pie',
-                data: {
-                    labels: statusLabels,
-                    datasets: [{
-                        data: statusValues,
-                        backgroundColor: [
-                            'rgb(34, 197, 94)',  // emerald-500 (active)
-                            'rgb(251, 146, 60)', // orange-500 (retired)
-                            'rgb(239, 68, 68)',  // red-500 (disabled)
-                            'rgb(59, 130, 246)'  // blue-500 (deceased)
-                        ],
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: 'rgb(75, 85, 99)' // gray-700
-                            }
-                        },
-                        title: {
-                            display: false,
-                            text: 'สถานะกำลังพล',
-                            color: 'rgb(75, 85, 99)'
-                        }
-                    }
+                // Close sidebar on mobile after click
+                if (window.innerWidth < 768) {
+                    sidebar.classList.add('-translate-x-full');
                 }
             });
+        });
 
-            // Welfare Type Chart (Bar Chart)
-            welfareTypeChartInstance = new Chart(welfareTypeChartCanvas, {
+        document.querySelectorAll('.close-modal-btn').forEach(btn => {
+            btn.addEventListener('click', hideAllModals);
+        });
+
+        // --- Dashboard Logic ---
+        function setupDashboardListeners() {
+            // This is a placeholder. In a real app, you would query a 'requests' collection.
+            const totalEl = document.getElementById('total-requests');
+            const pendingEl = document.getElementById('pending-requests');
+            const approvedEl = document.getElementById('approved-requests');
+            
+            // Mock data
+            const mockData = { total: 25, pending: 10, approved: 15 };
+            totalEl.textContent = mockData.total;
+            pendingEl.textContent = mockData.pending;
+            approvedEl.textContent = mockData.approved;
+
+            // Chart.js
+            const ctx = document.getElementById('requestsChart').getContext('2d');
+            if (requestsChart) {
+                requestsChart.destroy();
+            }
+            requestsChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: welfareTypeLabels,
+                    labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'],
                     datasets: [{
-                        label: 'จำนวนรายการ',
-                        data: welfareTypeValues,
-                        backgroundColor: 'rgb(37, 99, 235)', // blue-600
-                        borderColor: 'rgb(29, 78, 216)', // blue-700
-                        borderWidth: 1
+                        label: 'จำนวนคำร้อง',
+                        data: [5, 8, 12, 7, 9, 15],
+                        backgroundColor: '#5C945C',
+                        borderColor: '#3E623E',
+                        borderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             labels: {
-                                color: 'rgb(75, 85, 99)'
+                                font: { family: "'IBM Plex Sans Thai', sans-serif" }
                             }
-                        },
-                        title: {
-                            display: false,
-                            text: 'ประเภทสวัสดิการ',
-                            color: 'rgb(75, 85, 99)'
                         }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: 'rgb(75, 85, 99)'
-                            },
-                            grid: {
-                                color: 'rgb(229, 231, 235)' // gray-200
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: 'rgb(75, 85, 99)'
-                            },
-                            grid: {
-                                color: 'rgb(229, 231, 235)'
-                            }
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
             });
         }
 
-        function renderHeatmapTable(data) {
-            heatmapTableBody.innerHTML = ''; // Clear existing rows
+        // --- Admin Logic ---
+        let usersUnsubscribe;
+        function setupAdminListeners() {
+            if (usersUnsubscribe) usersUnsubscribe(); // Detach old listener
 
-            // Aggregate data for heatmap-like table: unit vs welfare type counts
-            const unitWelfareCounts = {};
-            const allUnits = new Set();
-            const allWelfareTypes = new Set();
-
-            data.forEach(item => {
-                const unit = item.unit || 'ไม่ระบุหน่วย';
-                const welfareType = item.welfareType || 'ไม่ระบุประเภท';
-
-                allUnits.add(unit);
-                allWelfareTypes.add(welfareType);
-
-                if (!unitWelfareCounts[unit]) {
-                    unitWelfareCounts[unit] = {};
-                }
-                unitWelfareCounts[unit][welfareType] = (unitWelfareCounts[unit][welfareType] || 0) + 1;
-            });
-
-            const sortedUnits = Array.from(allUnits).sort();
-            const sortedWelfareTypes = Array.from(allWelfareTypes).sort();
-
-            // Update table header for dynamic welfare types
-            const headerRow = document.querySelector('.official-table thead tr');
-            headerRow.innerHTML = '<th>หน่วย</th>' + sortedWelfareTypes.map(type => `<th>${type}</th>`).join('');
-
-
-            // Populate table body
-            sortedUnits.forEach(unit => {
-                const row = document.createElement('tr');
-                const unitCell = document.createElement('td');
-                unitCell.textContent = unit;
-                row.appendChild(unitCell);
-
-                sortedWelfareTypes.forEach(type => {
-                    const count = unitWelfareCounts[unit] && unitWelfareCounts[unit][type] ? unitWelfareCounts[unit][type] : 0;
-                    const cell = document.createElement('td');
-                    cell.textContent = count;
-
-                    // Apply color based on count (simple heatmap logic)
-                    if (count > 5) {
-                        cell.classList.add('bg-red-200'); // High activity (light red)
-                    } else if (count > 2) {
-                        cell.classList.add('bg-orange-200'); // Medium activity (light orange)
-                    } else if (count > 0) {
-                        cell.classList.add('bg-yellow-100'); // Low activity (very light yellow)
-                    } else {
-                        cell.classList.add('bg-white'); // No activity
-                    }
-                    row.appendChild(cell);
+            const usersCollection = collection(db, 'users');
+            usersUnsubscribe = onSnapshot(usersCollection, (snapshot) => {
+                userTableBody.innerHTML = ''; // Clear table
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="whitespace-nowrap">${user.email}</td>
+                        <td>${user.name || 'N/A'}</td>
+                        <td>${user.role}</td>
+                        <td class="space-x-2 whitespace-nowrap">
+                            <button data-id="${doc.id}" class="edit-user-btn mc-button text-sm py-1 px-2">Edit</button>
+                            <button data-id="${doc.id}" class="delete-user-btn mc-button mc-button-danger text-sm py-1 px-2">Delete</button>
+                        </td>
+                    `;
+                    userTableBody.appendChild(tr);
                 });
-                heatmapTableBody.appendChild(row);
             });
         }
 
-
-        // --- Event Listeners for View Navigation ---
-        registerLink.addEventListener('click', (e) => { e.preventDefault(); showView('register'); });
-        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); showView('forgotPassword'); });
-        backToLoginLink.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
-        backToLoginFromForgotLink.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
-        goToFormBtn.addEventListener('click', () => showView('form'));
-        backToDashboardBtn.addEventListener('click', () => showView('dashboard'));
-        modalCloseBtn.addEventListener('click', hideModal);
-
-        // --- Initial Load ---
-        // onAuthStateChanged will handle the initial view based on login status
-        // Add event listeners for inactivity timer
-        ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
-            document.addEventListener(event, resetInactivityTimer);
+        addUserBtn.addEventListener('click', () => {
+            userForm.reset();
+            userFormTitle.textContent = 'Add User (Manual)';
+            document.getElementById('user-id').value = '';
+            document.getElementById('user-email').readOnly = false;
+            document.getElementById('user-email').classList.remove('bg-gray-500');
+            signatureSection.classList.add('hidden'); // Hide signature for new user creation
+            showModal(userFormModal);
+            alert("การเพิ่มผู้ใช้ด้วยตนเองสำหรับกรณีที่ผู้ใช้ไม่มีอีเมล หรือเพื่อการทดสอบเท่านั้น ผู้ใช้ที่สร้างด้วยวิธีนี้จะไม่มีรหัสผ่านและไม่สามารถล็อกอินได้ แนะนำให้ผู้ใช้ลงทะเบียนด้วยตนเอง");
         });
-        // Initial call to set up the timer if already logged in (e.g., page refresh)
-        if (auth.currentUser) {
-            resetInactivityTimer();
-        }
+
+        userTableBody.addEventListener('click', async (e) => {
+            const target = e.target;
+            const userId = target.dataset.id;
+
+            if (target.classList.contains('edit-user-btn')) {
+                showLoading();
+                const userDoc = await getDoc(doc(db, 'users', userId));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    userForm.reset();
+                    userFormTitle.textContent = 'Edit User';
+                    document.getElementById('user-id').value = userId;
+                    document.getElementById('user-email').value = userData.email;
+                    document.getElementById('user-email').readOnly = true;
+                    document.getElementById('user-email').classList.add('bg-gray-500');
+                    document.getElementById('user-name').value = userData.name || '';
+                    document.getElementById('user-role').value = userData.role;
+
+                    // Handle signature section visibility and preview
+                    const signaturePreview = document.getElementById('signature-preview');
+                    const noSignatureText = document.getElementById('no-signature-text');
+                    if (['ผู้ตรวจสอบ', 'ผู้บังคับบัญชา'].includes(userData.role)) {
+                        signatureSection.classList.remove('hidden');
+                        if (userData.signatureUrl) {
+                            signaturePreview.src = userData.signatureUrl;
+                            signaturePreview.classList.remove('hidden');
+                            noSignatureText.classList.add('hidden');
+                        } else {
+                            signaturePreview.classList.add('hidden');
+                            noSignatureText.classList.remove('hidden');
+                        }
+                    } else {
+                        signatureSection.classList.add('hidden');
+                    }
+                    
+                    showModal(userFormModal);
+                }
+                hideLoading();
+            }
+
+            if (target.classList.contains('delete-user-btn')) {
+                if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้รายนี้? การกระทำนี้ไม่สามารถย้อนกลับได้`)) {
+                    if (userId === currentUser.uid) {
+                        alert("คุณไม่สามารถลบบัญชีของตัวเองได้");
+                        return;
+                    }
+                    showLoading();
+                    try {
+                        await deleteDoc(doc(db, "users", userId));
+                        // Note: This only deletes the Firestore record, not the Auth user.
+                        // Deleting the Auth user requires Admin SDK on a backend.
+                        alert('ลบข้อมูลผู้ใช้สำเร็จ');
+                    } catch (error) {
+                        alert(`Error deleting user: ${error.message}`);
+                    } finally {
+                        hideLoading();
+                    }
+                }
+            }
+        });
+
+        // Show/hide signature upload based on role selection in the form
+        document.getElementById('user-role').addEventListener('change', (e) => {
+            if (['ผู้ตรวจสอบ', 'ผู้บังคับบัญชา'].includes(e.target.value)) {
+                signatureSection.classList.remove('hidden');
+            } else {
+                signatureSection.classList.add('hidden');
+            }
+        });
+
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const userId = document.getElementById('user-id').value;
+            const name = document.getElementById('user-name').value;
+            const role = document.getElementById('user-role').value;
+            const signatureFile = document.getElementById('signature-upload').files[0];
+
+            try {
+                const userDocRef = doc(db, 'users', userId);
+                const dataToUpdate = { name, role };
+                
+                // Handle signature upload
+                if (signatureFile && ['ผู้ตรวจสอบ', 'ผู้บังคับบัญชา'].includes(role)) {
+                    const storageRef = ref(storage, `signatures/${userId}/${signatureFile.name}`);
+                    await uploadBytes(storageRef, signatureFile);
+                    dataToUpdate.signatureUrl = await getDownloadURL(storageRef);
+                }
+
+                await updateDoc(userDocRef, dataToUpdate);
+                
+                hideAllModals();
+                alert('บันทึกข้อมูลผู้ใช้สำเร็จ');
+            } catch (error) {
+                alert(`Error saving user: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        });
 
     </script>
 </body>
