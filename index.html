@@ -7,23 +7,26 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf-autotable.umd.min.js"></script>
+
     <style>
-        /* ซ่อน UI ที่ไม่ต้องการพิมพ์ */
+        /* Custom styles for printing */
         @media print {
             body * {
                 visibility: hidden;
             }
-            #print-area, #print-area * {
+            #print-section, #print-section * {
                 visibility: visible;
             }
-            #print-area {
+            #print-section {
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
             }
             .no-print {
-                display: none !important;
+                display: none;
             }
         }
     </style>
@@ -31,525 +34,443 @@
 <body class="bg-gray-100 font-sans">
 
     <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">ทำเนียบรุ่นนักเรียนเตรียมทหาร รุ่นที่ 31 (ตท.31)</h1>
-            <p class="text-gray-600">ระบบบันทึกและค้นหาข้อมูลออนไลน์</p>
-        </header>
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-red-800 mb-8">ทำเนียบรุ่น ตท.31</h1>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">จัดการข้อมูล</h2>
-                <form id="data-form">
-                    <input type="hidden" id="record-id">
-                    <input type="hidden" id="imageBase64">
-                    <input type="hidden" id="imageFileName">
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">จัดการข้อมูล</h2>
+            <form id="data-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <input type="hidden" id="record-id">
+                <input type="hidden" id="existing-image-url">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="affiliation" class="block text-sm font-medium text-gray-700">สังกัด</label>
-                            <select id="affiliation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                <option>ทบ.</option>
-                                <option>ทร.</option>
-                                <option>ทอ.</option>
-                                <option>ตร.</option>
-                                <option>สป.</option>
-                                <option>ทท.</option>
-                                <option>สปท.</option>
-                                <option>อื่นๆ</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="rank" class="block text-sm font-medium text-gray-700">ยศ</label>
-                            <select id="rank" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                <option>พล.อ.</option>
-                                <option>พล.ท.</option>
-                                <option>พล.ต.</option>
-                                <option>พ.อ.(พ.)</option>
-                                <option>พ.อ.</option>
-                                <option>พ.ท.</option>
-                                <option>พ.ต.</option>
-                                <option>อื่นๆ</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <label for="firstName" class="block text-sm font-medium text-gray-700">ชื่อ</label>
-                        <input type="text" id="firstName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                    </div>
-
-                    <div class="mt-4">
-                        <label for="lastName" class="block text-sm font-medium text-gray-700">สกุล</label>
-                        <input type="text" id="lastName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label for="position" class="block text-sm font-medium text-gray-700">ตำแหน่ง</label>
-                        <input type="text" id="position" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                    </div>
-
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="corps" class="block text-sm font-medium text-gray-700">เหล่า</label>
-                            <select id="corps" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                <option>ร.</option><option>ม.</option><option>ป.</option><option>ช.</option>
-                                <option>ส.</option><option>สพ.</option><option>ขส.</option><option>พธ.</option>
-                                <option>สห.</option><option>ผท.</option><option>อื่นๆ</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="retirementYear" class="block text-sm font-medium text-gray-700">ปีเกษียณ</label>
-                            <input type="number" id="retirementYear" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="พ.ศ.">
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label for="phone" class="block text-sm font-medium text-gray-700">เบอร์โทร</label>
-                        <input type="tel" id="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                    </div>
-
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                             <label for="province" class="block text-sm font-medium text-gray-700">จังหวัด</label>
-                            <input type="text" id="province" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        </div>
-                        <div>
-                            <label for="district" class="block text-sm font-medium text-gray-700">อำเภอ</label>
-                            <input type="text" id="district" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <label for="profileImage" class="block text-sm font-medium text-gray-700">รูปภาพประจำตัว</label>
-                        <input type="file" id="profileImage" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
-                        <img id="image-preview" src="" class="mt-2 w-24 h-24 object-cover rounded-md hidden">
-                    </div>
-
-                    <div class="mt-6 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3">
-                         <button type="button" id="btn-save" class="col-span-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            บันทึกข้อมูล
-                        </button>
-                        <button type="button" id="btn-update" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" disabled>
-                            แก้ไข
-                        </button>
-                        <button type="button" id="btn-delete" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" disabled>
-                            ลบ
-                        </button>
-                        <button type="button" id="btn-clear" class="col-span-2 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            ล้างฟอร์ม
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-
-            <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">ค้นหาและแสดงผลข้อมูล</h2>
-                
-                <div class="flex flex-wrap gap-4 items-center mb-4 no-print">
-                    <input type="text" id="search-name" placeholder="ค้นหาด้วยชื่อ..." class="flex-grow rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                    <input type="text" id="search-lastname" placeholder="ค้นหาด้วยสกุล..." class="flex-grow rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                    <button id="btn-search" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">ค้นหา</button>
-                    <button id="btn-reset-search" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">แสดงทั้งหมด</button>
+                <div>
+                    <label for="affiliation" class="block text-sm font-medium text-gray-700">สังกัด</label>
+                    <select id="affiliation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                        <option>ทบ.</option><option>สป.</option><option>ทท.</option><option>สปท.</option><option>อื่นๆ</option>
+                    </select>
                 </div>
-
-                <div class="flex flex-wrap gap-4 mb-4 no-print">
-                     <button id="btn-print" class="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600">พิมพ์รายงาน PDF</button>
-                    <button id="btn-download-json" class="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">ดาวน์โหลดข้อมูล (JSON)</button>
+                <div>
+                    <label for="rank" class="block text-sm font-medium text-gray-700">ยศ</label>
+                    <select id="rank" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                        <option>พล.อ.</option><option>พล.ท.</option><option>พล.ต.</option><option>พ.อ.(พ.)</option><option>พ.อ.</option><option>พ.ท.</option><option>พ.ต.</option>
+                    </select>
                 </div>
-
-
-                <div id="print-area" class="overflow-x-auto">
-                    <h3 class="text-xl font-semibold mb-2 print-only">รายงานทำเนียบรุ่น ตท.31</h3>
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รูป</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อ-สกุล</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ตำแหน่ง</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สังกัด/เหล่า</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">โทรศัพท์</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
-                           </tbody>
-                    </table>
+                <div>
+                    <label for="first-name" class="block text-sm font-medium text-gray-700">ชื่อ</label>
+                    <input type="text" id="first-name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
                 </div>
-            </div>
+                <div>
+                    <label for="last-name" class="block text-sm font-medium text-gray-700">สกุล</label>
+                    <input type="text" id="last-name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="position" class="block text-sm font-medium text-gray-700">ตำแหน่ง</label>
+                    <input type="text" id="position" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="corps" class="block text-sm font-medium text-gray-700">เหล่า</label>
+                    <select id="corps" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                        <option>ร.</option><option>ม.</option><option>ป.</option><option>ช.</option><option>ส.</option><option>สพ.</option><option>ขส.</option><option>พธ.</option><option>สห.</option><option>ผท.</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="retirement-year" class="block text-sm font-medium text-gray-700">ปีเกษียณ</label>
+                    <input type="number" id="retirement-year" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700">เบอร์โทร</label>
+                    <input type="tel" id="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="province" class="block text-sm font-medium text-gray-700">จังหวัด</label>
+                    <input type="text" id="province" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="district" class="block text-sm font-medium text-gray-700">อำเภอ</label>
+                    <input type="text" id="district" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                </div>
+                <div class="md:col-span-1">
+                    <label for="profile-image" class="block text-sm font-medium text-gray-700">รูปประจำตัว</label>
+                    <input type="file" id="profile-image" accept="image/*" class="mt-1 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"/>
+                    <img id="image-preview" src="" class="mt-2 h-24 w-24 object-cover rounded-md hidden">
+                </div>
+                <div class="md:col-span-2 lg:col-span-3 flex flex-wrap gap-4 items-center justify-end">
+                    <button type="submit" id="save-btn" class="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">บันทึก</button>
+                    <button type="button" id="update-btn" class="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 hidden">แก้ไข</button>
+                    <button type="button" id="clear-btn" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">ล้างฟอร์ม</button>
+                </div>
+            </form>
         </div>
 
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">ทำเนียบรุ่น</h2>
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <input type="text" id="search-input" placeholder="ค้นหาจากชื่อ หรือ สกุล..." class="flex-grow w-full md:w-auto rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
+                <button id="search-btn" class="w-full md:w-auto bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">ค้นหา</button>
+                <button id="print-pdf-btn" class="w-full md:w-auto bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">พิมพ์รายงาน PDF</button>
+                <button id="download-json-btn" class="w-full md:w-auto bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600">ดาวน์โหลดข้อมูล (JSON)</button>
+            </div>
+            <div class="overflow-x-auto" id="print-section">
+                <h3 class="text-xl font-bold text-center mb-4 hidden print-title">รายงานทำเนียบรุ่น ตท.31</h3>
+                 <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">รูป</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ยศ-ชื่อ-สกุล</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ตำแหน่ง</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สังกัด/เหล่า</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ติดต่อ</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider no-print">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
-        $(document).ready(function() {
-            // =================================================================
-            // CONFIGURATION
-            // =================================================================
-            // !!! สำคัญมาก: ใส่ URL ของ Web App ที่ได้จากการ Deploy ใน Google Apps Script ตรงนี้
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3fKjWaVFa5P2AcIK-YRH2_6LV-h14JIA6JbIEsuBmmYg8gUN1c7_vekr3xoM6qlHH/exec"; 
-            let allData = []; // Store all data locally to reduce API calls
+    $(document).ready(function() {
+        // <<<<<----- PASTE YOUR GOOGLE APPS SCRIPT URL HERE ----->>>>>
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJkN7Ws-Do2YcxYVl-o9914T967avbFyrahPvsKBlPfcogMgknMZ1ffzqxqCfAaN8e-w/exec'; // <--- ใส่ URL ใหม่หลังจาก Deploy Code.gs
 
-            // =================================================================
-            // FUNCTIONS
-            // =================================================================
+        let allData = []; 
 
-            // Load data from Google Sheet
-            function loadData() {
-                Swal.fire({
-                    title: 'กำลังโหลดข้อมูล...',
-                    text: 'กรุณารอสักครู่',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
+        // --- Utility Functions ---
+        const showLoading = (title) => {
+            Swal.fire({
+                title: title,
+                text: 'กรุณารอสักครู่...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        };
+        
+        const showSuccess = (message) => {
+            Swal.fire({
+                icon: 'success',
+                title: 'สำเร็จ!',
+                text: message,
+            });
+        };
 
-                $.ajax({
-                    url: SCRIPT_URL,
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        allData = data.data; // Assuming your script returns { "data": [...] }
-                        renderTable(allData);
-                        Swal.close();
-                    },
-                    error: function(err) {
-                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถโหลดข้อมูลได้: ' + err.statusText, 'error');
-                    }
-                });
+        const showError = (message) => {
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด!',
+                text: message,
+            });
+        };
+        
+        // --- Form and UI Logic ---
+        function clearForm() {
+            $('#data-form')[0].reset();
+            $('#record-id').val('');
+            $('#existing-image-url').val('');
+            $('#image-preview').addClass('hidden').attr('src', '');
+            $('#update-btn').addClass('hidden');
+            $('#save-btn').removeClass('hidden');
+        }
+
+        $('#clear-btn').on('click', clearForm);
+
+        $('#profile-image').on('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#image-preview').attr('src', e.target.result).removeClass('hidden');
+                }
+                reader.readAsDataURL(file);
             }
-
-            // Render data into the table
-            function renderTable(data) {
-                const tableBody = $('#data-table-body');
-                tableBody.empty();
-                if (data.length === 0) {
-                    tableBody.append('<tr><td colspan="5" class="text-center py-4">ไม่พบข้อมูล</td></tr>');
-                    return;
-                }
-                data.forEach(row => {
-                    // row format: [id, timestamp, affiliation, rank, ..., image_url]
-                    const record = {
-                        id: row[0],
-                        affiliation: row[2],
-                        rank: row[3],
-                        firstName: row[4],
-                        lastName: row[5],
-                        position: row[6],
-                        corps: row[7],
-                        retirementYear: row[8],
-                        phone: row[9],
-                        province: row[10],
-                        district: row[11],
-                        imageUrl: row[12]
-                    };
-
-                    const tr = `
-                        <tr class="hover:bg-gray-100 cursor-pointer" data-record='${JSON.stringify(record)}'>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <img src="${record.imageUrl || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full object-cover">
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">${record.rank} ${record.firstName} ${record.lastName}</div>
-                                <div class="text-sm text-gray-500">เกษียณ: ${record.retirementYear || '-'}</div>
-                            </td>
-                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.position}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <div>${record.affiliation}</div>
-                                <div>เหล่า: ${record.corps}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.phone}</td>
-                        </tr>
-                    `;
-                    tableBody.append(tr);
-                });
-            }
-
-            // Clear form fields
-            function clearForm() {
-                $('#data-form')[0].reset();
-                $('#record-id').val('');
-                $('#imageBase64').val('');
-                $('#imageFileName').val('');
-                $('#image-preview').addClass('hidden').attr('src', '');
-                $('#btn-update, #btn-delete').prop('disabled', true);
-                $('#btn-save').prop('disabled', false);
-            }
-
-            // Handle file input change to convert image to base64
-            $('#profileImage').on('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        $('#imageBase64').val(e.target.result.split(',')[1]);
-                        $('#imageFileName').val(file.name);
-                        $('#image-preview').attr('src', e.target.result).removeClass('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            // =================================================================
-            // EVENT HANDLERS
-            // =================================================================
-
-            // Save new record
-            $('#btn-save').on('click', function() {
-                if (!$('#firstName').val() || !$('#lastName').val()) {
-                    Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากรอกชื่อและนามสกุล', 'warning');
-                    return;
-                }
-
-                Swal.fire({
-                    title: 'กำลังบันทึกข้อมูล...',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading(); }
-                });
-
-                const data = {
-                    action: 'create',
-                    affiliation: $('#affiliation').val(),
-                    rank: $('#rank').val(),
-                    firstName: $('#firstName').val(),
-                    lastName: $('#lastName').val(),
-                    position: $('#position').val(),
-                    corps: $('#corps').val(),
-                    retirementYear: $('#retirementYear').val(),
-                    phone: $('#phone').val(),
-                    province: $('#province').val(),
-                    district: $('#district').val(),
-                    imageData: $('#imageBase64').val(),
-                    imageName: $('#imageFileName').val()
-                };
-
-                $.ajax({
-                    url: SCRIPT_URL,
-                    method: 'POST',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json',
-                    success: function(response) {
-                        if (response.result === 'success') {
-                            Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
-                            clearForm();
-                            loadData();
-                        } else {
-                            Swal.fire('เกิดข้อผิดพลาด!', response.message, 'error');
-                        }
-                    },
-                    error: function(err) {
-                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
-                    }
-                });
-            });
-            
-            // Update existing record
-            $('#btn-update').on('click', function() {
-                const recordId = $('#record-id').val();
-                if (!recordId) return;
-
-                Swal.fire({
-                    title: 'ยืนยันการแก้ไข',
-                    text: "คุณต้องการบันทึกการเปลี่ยนแปลงนี้ใช่หรือไม่?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'ใช่, แก้ไข!',
-                    cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire({
-                            title: 'กำลังอัปเดตข้อมูล...',
-                            allowOutsideClick: false,
-                            didOpen: () => { Swal.showLoading(); }
-                        });
-                        
-                        const data = {
-                            action: 'update',
-                            id: recordId,
-                            affiliation: $('#affiliation').val(),
-                            rank: $('#rank').val(),
-                            firstName: $('#firstName').val(),
-                            lastName: $('#lastName').val(),
-                            position: $('#position').val(),
-                            corps: $('#corps').val(),
-                            retirementYear: $('#retirementYear').val(),
-                            phone: $('#phone').val(),
-                            province: $('#province').val(),
-                            district: $('#district').val(),
-                            imageData: $('#imageBase64').val(), // Send new image data if any
-                            imageName: $('#imageFileName').val()
-                        };
-
-                        $.ajax({
-                            url: SCRIPT_URL,
-                            method: 'POST',
-                            data: JSON.stringify(data),
-                            contentType: 'application/json',
-                            success: function(response) {
-                                if (response.result === 'success') {
-                                    Swal.fire('สำเร็จ!', 'แก้ไขข้อมูลเรียบร้อยแล้ว', 'success');
-                                    clearForm();
-                                    loadData();
-                                } else {
-                                    Swal.fire('เกิดข้อผิดพลาด!', response.message, 'error');
-                                }
-                            },
-                            error: function() {
-                                Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
-                            }
-                        });
-                    }
-                });
-            });
-
-            // Delete record
-            $('#btn-delete').on('click', function() {
-                const recordId = $('#record-id').val();
-                if (!recordId) return;
-
-                Swal.fire({
-                    title: 'คุณแน่ใจหรือไม่?',
-                    text: "ข้อมูลจะถูกลบอย่างถาวร!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'ใช่, ลบเลย!',
-                    cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                         Swal.fire({
-                            title: 'กำลังลบข้อมูล...',
-                            allowOutsideClick: false,
-                            didOpen: () => { Swal.showLoading(); }
-                        });
-
-                        const data = { action: 'delete', id: recordId };
-                        $.ajax({
-                            url: SCRIPT_URL,
-                            method: 'POST',
-                            data: JSON.stringify(data),
-                            contentType: 'application/json',
-                            success: function(response) {
-                                if(response.result === 'success'){
-                                    Swal.fire('ลบแล้ว!', 'ข้อมูลของคุณถูกลบเรียบร้อยแล้ว', 'success');
-                                    clearForm();
-                                    loadData();
-                                } else {
-                                    Swal.fire('เกิดข้อผิดพลาด!', response.message, 'error');
-                                }
-                            },
-                            error: function() {
-                                Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
-                            }
-                        });
-                    }
-                });
-            });
-
-
-            // Click on a table row to populate the form
-            $('#data-table-body').on('click', 'tr', function() {
-                const record = $(this).data('record');
-                if (!record) return;
-
-                $('#record-id').val(record.id);
-                $('#affiliation').val(record.affiliation);
-                $('#rank').val(record.rank);
-                $('#firstName').val(record.firstName);
-                $('#lastName').val(record.lastName);
-                $('#position').val(record.position);
-                $('#corps').val(record.corps);
-                $('#retirementYear').val(record.retirementYear);
-                $('#phone').val(record.phone);
-                $('#province').val(record.province);
-                $('#district').val(record.district);
-                
-                $('#image-preview').attr('src', record.imageUrl).removeClass('hidden');
-                $('#imageBase64').val(''); // Clear old image data
-                $('#imageFileName').val('');
-                $('#profileImage').val('');
-
-                $('#btn-update, #btn-delete').prop('disabled', false);
-                $('#btn-save').prop('disabled', true);
-            });
-            
-            // Search button
-            $('#btn-search').on('click', function() {
-                const searchName = $('#search-name').val().toLowerCase();
-                const searchLastName = $('#search-lastname').val().toLowerCase();
-
-                if (!searchName && !searchLastName) {
-                    renderTable(allData);
-                    return;
-                }
-
-                const filteredData = allData.filter(row => {
-                    const firstName = row[4] ? row[4].toLowerCase() : '';
-                    const lastName = row[5] ? row[5].toLowerCase() : '';
-                    const matchName = searchName ? firstName.includes(searchName) : true;
-                    const matchLastName = searchLastName ? lastName.includes(searchLastName) : true;
-                    return matchName && matchLastName;
-                });
-                
-                renderTable(filteredData);
-                Swal.fire({
-                    title: filteredData.length > 0 ? 'พบข้อมูล' : 'ไม่พบข้อมูล',
-                    text: `พบข้อมูลทั้งหมด ${filteredData.length} รายการ`,
-                    icon: filteredData.length > 0 ? 'success' : 'info',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            });
-
-            // Reset search button
-            $('#btn-reset-search').on('click', function() {
-                $('#search-name').val('');
-                $('#search-lastname').val('');
-                renderTable(allData);
-            });
-
-            // Clear form button
-            $('#btn-clear').on('click', clearForm);
-            
-            // Download JSON button
-            $('#btn-download-json').on('click', function() {
-                if (allData.length === 0) {
-                    Swal.fire('ไม่มีข้อมูล', 'ไม่มีข้อมูลสำหรับดาวน์โหลด', 'warning');
-                    return;
-                }
-                const jsonData = JSON.stringify(allData, null, 2);
-                const blob = new Blob([jsonData], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'thainiaem_afaps31.json';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                Swal.fire('สำเร็จ', 'ดาวน์โหลดข้อมูล JSON เรียบร้อย', 'success');
-            });
-            
-            // Print PDF button
-            $('#btn-print').on('click', function() {
-                 Swal.fire({
-                    title: 'เตรียมพิมพ์',
-                    text: 'กำลังเปิดหน้าต่างสำหรับพิมพ์...',
-                    icon: 'info',
-                    timer: 1500,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.print();
-                });
-            });
-
-            // Initial data load
-            loadData();
         });
-    </script>
 
+        // --- Data Fetching and Rendering ---
+        function renderTable(data) {
+            const tableBody = $('#data-table-body');
+            tableBody.empty();
+            if (data.length === 0) {
+                 tableBody.append('<tr><td colspan="6" class="text-center py-4">ไม่พบข้อมูล</td></tr>');
+                 return;
+            }
+            data.forEach(item => {
+                const row = `
+                    <tr data-id="${item.id}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <img src="${item.รูปภาพ || 'https://via.placeholder.com/50'}" alt="Profile" class="h-12 w-12 rounded-full object-cover">
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${item.ยศ} ${item.ชื่อ}</div>
+                            <div class="text-sm text-gray-500">${item.สกุล}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.ตำแหน่ง || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                             <div class="text-sm text-gray-900">${item.สังกัด || '-'}</div>
+                             <div class="text-sm text-gray-500">เหล่า: ${item.เหล่า || '-'}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div>โทร: ${item.เบอร์โทร || '-'}</div>
+                            <div>เกษียณ: ${item.ปีเกษียณ || '-'}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium no-print">
+                            <a href="#" class="text-yellow-600 hover:text-yellow-800 edit-btn">แก้ไข</a>
+                            <a href="#" class="text-red-600 hover:text-red-900 ml-4 delete-btn">ลบ</a>
+                        </td>
+                    </tr>
+                `;
+                tableBody.append(row);
+                // Attach data to the row for easy access
+                $(`tr[data-id="${item.id}"]`).data('record', item);
+            });
+        }
+        
+        function loadData() {
+            showLoading('กำลังโหลดข้อมูล...');
+            $.ajax({
+                url: GOOGLE_SCRIPT_URL + '?action=read',
+                method: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    allData = data;
+                    renderTable(allData);
+                    Swal.close();
+                },
+                error: function(err) {
+                    showError('ไม่สามารถโหลดข้อมูลได้');
+                    console.error(err);
+                }
+            });
+        }
+        
+        // --- CRUD Operations ---
+
+        $('#data-form').on('submit', function(e) {
+            e.preventDefault();
+            const recordId = $('#record-id').val();
+            if (recordId) {
+                handleUpdate(recordId);
+            } else {
+                handleSave();
+            }
+        });
+
+        function handleSave() {
+             const fileInput = $('#profile-image')[0];
+             const record = {
+                affiliation: $('#affiliation').val(),
+                rank: $('#rank').val(),
+                firstName: $('#first-name').val(),
+                lastName: $('#last-name').val(),
+                position: $('#position').val(),
+                corps: $('#corps').val(),
+                retirementYear: $('#retirement-year').val(),
+                phone: $('#phone').val(),
+                province: $('#province').val(),
+                district: $('#district').val()
+            };
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // *** ตรวจสอบว่าใช้ 'imageData' ตรงกับที่ Server คาดหวัง ***
+                    record.imageData = { 
+                        base64: e.target.result,
+                        name: file.name,
+                        type: file.type
+                    };
+                    sendData('create', record);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                 sendData('create', record);
+            }
+        }
+        
+        function handleUpdate(recordId) {
+            const fileInput = $('#profile-image')[0];
+            const record = {
+                id: recordId,
+                affiliation: $('#affiliation').val(),
+                rank: $('#rank').val(),
+                firstName: $('#first-name').val(),
+                lastName: $('#last-name').val(),
+                position: $('#position').val(),
+                corps: $('#corps').val(),
+                retirementYear: $('#retirement-year').val(),
+                phone: $('#phone').val(),
+                province: $('#province').val(),
+                district: $('#district').val(),
+                existingImageUrl: $('#existing-image-url').val()
+            };
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // *** ตรวจสอบว่าใช้ 'imageData' ตรงกับที่ Server คาดหวัง ***
+                    record.imageData = {
+                        base64: e.target.result,
+                        name: file.name,
+                        type: file.type
+                    };
+                    sendData('update', record);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                 sendData('update', record);
+            }
+        }
+
+        function sendData(action, data) {
+            showLoading(action === 'create' ? 'กำลังบันทึกข้อมูล...' : 'กำลังแก้ไขข้อมูล...');
+            $.ajax({
+                url: GOOGLE_SCRIPT_URL + `?action=${action}`,
+                method: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                    const res = JSON.parse(response);
+                    if (res.status === 'success') {
+                        showSuccess(res.message);
+                        clearForm();
+                        loadData(); 
+                    } else {
+                        showError(res.message);
+                    }
+                },
+                error: function(err) {
+                    showError('เกิดข้อผิดพลาดในการส่งข้อมูล');
+                    console.error(err);
+                }
+            });
+        }
+        
+        // Edit Button Handler
+        $('#data-table-body').on('click', '.edit-btn', function(e) {
+            e.preventDefault();
+            const record = $(this).closest('tr').data('record');
+            
+            $('#record-id').val(record.id);
+            $('#affiliation').val(record.สังกัด);
+            $('#rank').val(record.ยศ);
+            $('#first-name').val(record.ชื่อ);
+            $('#last-name').val(record.สกุล);
+            $('#position').val(record.ตำแหน่ง);
+            $('#corps').val(record.เหล่า);
+            $('#retirement-year').val(record.ปีเกษียณ);
+            $('#phone').val(record.เบอร์โทร);
+            $('#province').val(record.จังหวัด);
+            $('#district').val(record.อำเภอ);
+            $('#existing-image-url').val(record.รูปภาพ);
+
+            if (record.รูปภาพ) {
+                $('#image-preview').attr('src', record.รูปภาพ).removeClass('hidden');
+            } else {
+                $('#image-preview').addClass('hidden');
+            }
+
+            $('#save-btn').addClass('hidden');
+            $('#update-btn').removeClass('hidden');
+            $('html, body').animate({ scrollTop: 0 }, 'slow');
+        });
+
+        // Delete Button Handler
+        $('#data-table-body').on('click', '.delete-btn', function(e) {
+            e.preventDefault();
+            const recordId = $(this).closest('tr').data('record').id;
+            
+            Swal.fire({
+                title: 'คุณแน่ใจหรือไม่?',
+                text: "คุณจะไม่สามารถกู้คืนข้อมูลนี้ได้!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ลบเลย!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                     showLoading('กำลังลบข้อมูล...');
+                     $.ajax({
+                        url: GOOGLE_SCRIPT_URL + '?action=delete',
+                        method: 'POST',
+                        data: JSON.stringify({ id: recordId }),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            const res = JSON.parse(response);
+                            if (res.status === 'success') {
+                                showSuccess(res.message);
+                                loadData();
+                            } else {
+                                showError(res.message);
+                            }
+                        },
+                        error: function() {
+                            showError('เกิดข้อผิดพลาดในการลบข้อมูล');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Search Button Handler
+        $('#search-btn').on('click', function() {
+            const keyword = $('#search-input').val().toLowerCase();
+            if (!keyword) {
+                renderTable(allData); 
+                return;
+            }
+            showLoading('กำลังค้นหา...');
+            const filteredData = allData.filter(item => {
+                const fullName = `${item.ชื่อ} ${item.สกุล}`.toLowerCase();
+                return fullName.includes(keyword);
+            });
+            renderTable(filteredData);
+            Swal.close();
+            Swal.fire({
+                icon: 'info',
+                title: 'ผลการค้นหา',
+                text: `พบข้อมูล ${filteredData.length} รายการ`
+            });
+        });
+
+        $('#search-input').on('keyup', function(e){
+            if(e.key === 'Enter') $('#search-btn').click();
+        });
+
+        // --- Export and Print Buttons ---
+        
+        $('#download-json-btn').on('click', function() {
+            if (allData.length === 0) {
+                showError('ไม่มีข้อมูลสำหรับดาวน์โหลด');
+                return;
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ทำเนียบรุ่นตท31.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showSuccess('สร้างไฟล์ JSON เรียบร้อยแล้ว!');
+        });
+
+        $('#print-pdf-btn').on('click', function() {
+             if (allData.length === 0) {
+                showError('ไม่มีข้อมูลสำหรับพิมพ์');
+                return;
+            }
+            $('.print-title').removeClass('hidden'); 
+            window.print();
+            $('.print-title').addClass('hidden'); 
+        });
+
+        // --- Initial Load ---
+        loadData();
+    });
+    </script>
 </body>
 </html>
