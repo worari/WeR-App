@@ -231,10 +231,29 @@
             $.ajax({
                 url: GOOGLE_SCRIPT_URL + '?action=read',
                 method: 'GET',
-                dataType: 'json',
+                dataType: 'json', 
                 success: function(data) {
-                    allData = data;
-                    renderTable(allData);
+                    
+                    // VVVVVV ---- เพิ่มโค้ดแก้ไขตรงนี้ ---- VVVVVV
+                    let parsedData;
+                    if (typeof data === 'string') {
+                        // ถ้า data เป็น string ให้เรา parse เอง
+                        try {
+                             parsedData = JSON.parse(data);
+                        } catch (e) {
+                            showError('ข้อมูลที่ได้รับมีรูปแบบไม่ถูกต้อง');
+                            console.error("JSON Parse Error:", e, data);
+                            return;
+                        }
+                    } else {
+                        // ถ้า jQuery parse มาให้แล้ว (เป็น object/array) ก็ใช้ได้เลย
+                        parsedData = data;
+                    }
+                    
+                    allData = parsedData;
+                    renderTable(allData); // <--- ตอนนี้ renderTable จะได้ Array จริงๆ
+                    // ^^^^^^ ---- จบส่วนแก้ไข ---- ^^^^^^
+
                     Swal.close();
                 },
                 error: function(err) {
