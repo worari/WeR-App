@@ -1,1074 +1,164 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ทำเนียบรุ่น ตท.31</title>
+// ----------------------------------------
+// GLOBAL CONFIGURATION
+// ----------------------------------------
+const SHEET_ID = "1WR3QlzD0SxxIMh8Ggq1-Se4hBrWav-Wg0P10PV5YPkE"; // หรือใส่ ID ของชีตโดยตรง
+const SHEET_NAME = "Data";
+const DRIVE_FOLDER_ID = "1-aF1AeThZvzODLIZhB7BUFCuO2P2xqqr"; // 👈 ‼️ วาง Folder ID ของคุณที่นี่
+// ----------------------------------------
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+/**
+ * ให้บริการหน้าเว็บหลัก
+ */
+function doGet(e) {
+  return HtmlService.createTemplateFromFile("index").evaluate()
+    .setTitle("ระบบฐานข้อมูลทำเนียบรุ่น")
+    .addMetaTag("viewport", "width=device-width, initial-scale=1.0");
+}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            'kanit': ['Kanit', 'sans-serif'],
-            'sarabun': ['Sarabun', 'sans-serif'],
-          },
-          colors: {
-            // ธีมสีน้ำเงิน-เขียว พาสเทล
-            'theme-primary': '#3b82f6', // blue-500
-            'theme-secondary': '#10b981', // emerald-500
-            'theme-bg-light': '#f0f9ff', // blue-50
-            'theme-bg-dark': '#0f172a', // slate-900 (for dark mode, if needed)
-            'gold-border': '#fde68a', // สีขอบทองอ่อน
-            'pastel-blue': '#E0F2FE',
-            'pastel-green': '#D1FAE5',
-          }
-        }
-      }
+/**
+ * ดึงข้อมูลทั้งหมดจาก Google Sheet
+ */
+function loadData() {
+  try {
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+    if (sheet.getLastRow() < 2) {
+      return []; // ไม่มีข้อมูล (มีแค่หัวข้อ)
     }
-  </script>
+    const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn());
+    const values = dataRange.getValues();
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
 
-  <style>
-    body {
-      font-family: 'Kanit', sans-serif;
-      background-color: #f8fafc; /* slate-50 */
-    }
-    .card-custom {
-      @apply rounded-2xl shadow-lg border-2 border-transparent transition-all duration-300;
-      /* แทรกขอบทองอ่อน */
-      border-color: theme('colors.gold-border'); 
-    }
-    .nav-link.active {
-      @apply bg-theme-primary text-white;
-    }
-    
-    /* Responsive Table/Card */
-    #desktop-table {
-      @apply hidden md:table;
-    }
-    #data-display-cards {
-      @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:hidden;
-    }
-
-    /* Print Styles */
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #print-section, #print-section * {
-        visibility: visible;
-      }
-      #print-section {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-      }
-      .no-print {
-        display: none !important;
-      }
-      #desktop-table {
-        @apply table !important; /* บังคับให้ตารางแสดงผลตอนพิมพ์ */
-      }
-      #data-display-cards {
-        @apply hidden !important; /* ซ่อนการ์ดตอนพิมพ์ */
-      }
-    }
-  </style>
-
-</head>
-<body class="flex flex-col min-h-screen">
-
-  <div class="flex flex-1">
-    
-    <nav class="w-64 bg-white shadow-md p-4 space-y-2 no-print hidden md:block">
-      <h1 class="text-2xl font-bold text-theme-primary mb-4 text-center">ตท.31</h1>
-      <ul class="space-y-2">
-        <li>
-          <a href="#" id="nav-directory" class="nav-link flex items-center p-2 rounded-lg hover:bg-gray-100 active">
-            <span class="icon-wrapper w-5 h-5 mr-3"></span> ทำเนียบรุ่น
-          </a>
-        </li>
-        <li>
-          <a href="#" id="nav-form" class="nav-link flex items-center p-2 rounded-lg hover:bg-gray-100">
-            <span class="icon-wrapper w-5 h-5 mr-3"></span> จัดการข้อมูล
-          </a>
-        </li>
-        <li>
-          <a href="#" id="nav-dashboard" class="nav-link flex items-center p-2 rounded-lg hover:bg-gray-100">
-            <span class="icon-wrapper w-5 h-5 mr-3"></span> Dashboard
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg p-2 flex justify-around z-50 no-print">
-      <a href="#" id="nav-mobile-directory" class="nav-link flex flex-col items-center p-2 active">
-        <span class="icon-wrapper w-6 h-6"></span>
-        <span class="text-xs">ทำเนียบ</span>
-      </a>
-      <a href="#" id="nav-mobile-form" class="nav-link flex flex-col items-center p-2">
-        <span class="icon-wrapper w-6 h-6"></span>
-        <span class="text-xs">จัดการ</span>
-      </a>
-      <a href="#" id="nav-mobile-dashboard" class="nav-link flex flex-col items-center p-2">
-        <span class="icon-wrapper w-6 h-6"></span>
-        <span class="text-xs">Dashboard</span>
-      </a>
-    </nav>
-
-    <main class="flex-1 p-4 md:p-8 bg-gray-50 mb-16 md:mb-0">
-
-      <section id="directory-view" class="">
-        <h2 class="text-3xl font-semibold mb-6 text-gray-800">ทำเนียบรุ่น ตท.31</h2>
-
-        <div class="mb-4 flex flex-wrap gap-2 items-center no-print">
-          <input type="text" id="search-input" placeholder="ค้นหา (ชื่อ, สกุล, เหล่า, สังกัด)..." class="form-control max-w-sm flex-grow">
-          <button id="print-table-btn" class="btn btn-outline-primary">
-            <span class="icon-wrapper w-4 h-4 mr-1"></span> พิมพ์ตาราง
-          </button>
-          <button id="download-json-btn" class="btn btn-outline-secondary">
-            <span class="icon-wrapper w-4 h-4 mr-1"></span> โหลด JSON
-          </button>
-        </div>
-
-        <div id="print-section">
-          <div class="overflow-x-auto bg-white rounded-lg shadow">
-            <table id="desktop-table" class="table table-hover w-full align-middle">
-              <thead class="bg-gray-100">
-                <tr>
-                  <th>รูป</th>
-                  <th>ยศ-ชื่อ-สกุล</th>
-                  <th>ตำแหน่ง</th>
-                  <th>สังกัด</th>
-                  <th>เหล่า</th>
-                  <th>เกษียณ (พ.ศ.)</th>
-                  <th>ติดต่อ</th>
-                  <th class="no-print">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody id="table-body">
-                </tbody>
-            </table>
-          </div>
-
-          <div id="data-display-cards">
-            </div>
-        </div>
-
-        <div id="loading-spinner" class="text-center p-10">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-          <p class="mt-2">กำลังโหลดข้อมูล...</p>
-        </div>
-
-      </section>
-
-      <section id="form-view" class="hidden">
-        <h2 id="form-title" class="text-3xl font-semibold mb-6 text-gray-800">บันทึกข้อมูลส่วนตัว</h2>
-        
-        <form id="data-form" class="card-custom bg-white p-4 md:p-8">
-          <input type="hidden" id="UniqueID">
-          <input type="hidden" id="FileID">
-          <input type="hidden" id="ImageFormula">
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            <div class="md:col-span-1 space-y-4">
-              <h3 class="text-lg font-medium text-theme-primary border-b pb-2">1. ข้อมูลบุคคล</h3>
-              
-              <div>
-                <label class="form-label">รูปถ่าย</label>
-                <img id="photo-preview" src="https://via.placeholder.com/150.png?text=อัปโหลดรูป" alt="Preview" class="w-32 h-32 object-cover rounded-lg mb-2 border">
-                <input class="form-control form-control-sm" type="file" id="photo" accept="image/*">
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label for="Rank" class="form-label">อัตรายศ <span class="text-danger">*</span></label>
-                  <select id="Rank" class="form-select" required>
-                    <option value="">-- เลือกยศ --</option>
-                    <option value="พล.อ.(พ.)">พล.อ.(พ.)</option>
-                    <option value="พล.อ.">พล.อ.</option>
-                    <option value="พล.ท.">พล.ท.</option>
-                    <option value="พล.ต.">พล.ต.</option>
-                    <option value="พ.อ.(พ.)">พ.อ.(พ.)</option>
-                    <option value="พ.อ.">พ.อ.</option>
-                    <option value="พ.ท.">พ.ท.</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="Corps" class="form-label">เหล่า <span class="text-danger">*</span></label>
-                  <select id="Corps" class="form-select" required>
-                    <option value="">-- เลือกเหล่า --</option>
-                    <option value="ร.">ร.</option>
-                    <option value="ม.">ม.</option>
-                    <option value="ป.">ป.</option>
-                    <option value="ช.">ช.</option>
-                    <option value="ส.">ส.</option>
-                    <option value="สพ.">สพ.</option>
-                    <option value="ขส.">ขส.</option>
-                    <option value="พธ.">พธ.</option>
-                    <option value="สห.">สห.</option>
-                    <option value="ผท.">ผท.</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label for="FirstName" class="form-label">ชื่อ <span class="text-danger">*</span></label>
-                <input type="text" id="FirstName" class="form-control" required>
-              </div>
-
-              <div>
-                <label for="LastName" class="form-label">สกุล <span class="text-danger">*</span></label>
-                <input type="text" id="LastName" class="form-control" required>
-              </div>
-
-               <div>
-                <label for="Position" class="form-label">ตำแหน่ง</label>
-                <input type="text" id="Position" class="form-control">
-              </div>
-              
-              <div>
-                <label for="Affiliation" class="form-label">สังกัด <span class="text-danger">*</span></label>
-                <select id="Affiliation" class="form-select" required>
-                  <option value="">-- เลือกสังกัด --</option>
-                  <option value="ทบ.">ทบ.</option>
-                  <option value="สป.กห.">สป.กห.</option>
-                  <option value="บก.ทท.">บก.ทท.</option>
-                  <option value="สทป.">สทป.</option>
-                  <option value="อื่นๆ">อื่นๆ</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="RetirementYear" class="form-label">ปีเกษียณ (30 ก.ย. พ.ศ.)</label>
-                <input type="number" id="RetirementYear" class="form-control" placeholder="เช่น 2570" min="2560">
-                <div id="retirement-countdown" class="form-text"></div>
-              </div>
-
-              <div>
-                <label for="Phone" class="form-label">เบอร์โทร</label>
-                <input type="tel" id="Phone" class="form-control" placeholder="08xxxxxxxx" pattern="[0-9]{10}">
-                <div class="invalid-feedback">กรุณากรอกเบอร์โทร 10 หลัก</div>
-              </div>
-
-              <div>
-                <label for="Email" class="form-label">อีเมล</label>
-                <input type="email" id="Email" class="form-control" placeholder="example@mail.com">
-                <div class="invalid-feedback">รูปแบบอีเมลไม่ถูกต้อง</div>
-              </div>
-            </div>
-
-            <div class="md:col-span-1 space-y-4">
-              
-              <h3 class="text-lg font-medium text-theme-primary border-b pb-2">2. ข้อมูลครอบครัว</h3>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label for="MaritalStatus" class="form-label">สถานภาพ</label>
-                  <select id="MaritalStatus" class="form-select">
-                    <option value="">-- เลือก --</option>
-                    <option value="โสด">โสด</option>
-                    <option value="สมรส">สมรส</option>
-                    <option value="หย่า">หย่า</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="Children" class="form-label">จำนวนบุตร</label>
-                  <input type="number" id="Children" class="form-control" min="0">
-                </div>
-              </div>
-
-              <h3 class="text-lg font-medium text-theme-primary border-b pb-2">3. ที่อยู่ปัจจุบัน</h3>
-              <div>
-                <label for="Address" class="form-label">บ้านเลขที่, ถนน, ซอย</label>
-                <textarea id="Address" rows="3" class="form-control"></textarea>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label for="SubDistrict" class="form-label">ตำบล/แขวง</label>
-                  <input type="text" id="SubDistrict" class="form-control">
-                </div>
-                <div>
-                  <label for="District" class="form-label">อำเภอ/เขต</label>
-                  <input type="text" id="District" class="form-control">
-                </div>
-                <div>
-                  <label for="Province" class="form-label">จังหวัด</label>
-                  <input type="text" id="Province" class="form-control">
-                </div>
-                <div>
-                  <label for="PostalCode" class="form-label">รหัสไปรษณีย์</label>
-                  <input type="text" id="PostalCode" class="form-control">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="md:col-span-1 space-y-4">
-               <h3 class="text-lg font-medium text-theme-primary border-b pb-2">4. การดำเนินการ</h3>
-               <button type="submit" class="btn btn-primary w-full btn-lg">
-                 <span class="icon-wrapper w-5 h-5 mr-2"></span> บันทึกข้อมูล
-               </button>
-               <button type="button" id="clear-form-btn" class="btn btn-outline-secondary w-full">
-                 <span class="icon-wrapper w-5 h-5 mr-2"></span> ล้างฟอร์ม
-               </button>
-            </div>
-            
-          </div>
-        </form>
-      </section>
-
-      <section id="dashboard-view" class="hidden">
-        <h2 class="text-3xl font-semibold mb-6 text-gray-800">Dashboard สรุปข้อมูล</h2>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          <div class="card-custom bg-white p-4">
-            <h3 class="text-lg font-medium text-center mb-2">เปรียบเทียบสังกัด</h3>
-            <canvas id="chart-affiliation" height="250"></canvas>
-          </div>
-          <div class="card-custom bg-white p-4">
-            <h3 class="text-lg font-medium text-center mb-2">เปรียบเทียบยศ</h3>
-            <canvas id="chart-rank" height="250"></canvas>
-          </div>
-
-          <div class="card-custom bg-white p-4">
-            <h3 class="text-lg font-medium text-center mb-2">เปรียบเทียบเหล่า</h3>
-            <canvas id="chart-corps" height="250"></canvas>
-          </div>
-          <div class="card-custom bg-white p-4">
-            <h3 class="text-lg font-medium text-center mb-2">5 อันดับปีเกษียณ</h3>
-            <canvas id="chart-retirement" height="250"></canvas>
-          </div>
-
-          <div class="lg:col-span-2 card-custom bg-white p-4 min-h-[400px]">
-            <h3 class="text-lg font-medium text-center mb-2">แผนที่แสดงที่ตั้ง (จังหวัด)</h3>
-            <div id="map" class="h-[400px] md:h-[500px] rounded-lg z-0"></div>
-          </div>
-          
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <footer class="p-4 bg-white text-center text-gray-600 shadow-inner no-print">
-    <img src="https://images.unsplash.com/photo-1599814472308-377f37453f6c?q=80&w=1200&h=200&fit=crop&crop=center" 
-         alt="รั้วแดงกำแพงเหลือง" 
-         class="w-full max-w-4xl mx-auto h-24 object-cover rounded-lg mb-2">
-    <p>ทำเนียบรุ่นเตรียมทหาร รุ่นที่ 31</p>
-  </footer>
-
-  <div class="modal fade" id="image-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="image-modal-title">รูปถ่าย</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body text-center">
-          <img id="image-modal-src" src="" class="max-w-full h-auto" alt="Full size image">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/lucide.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <script>
-    // --- Global Variables ---
-    let DB = []; // Local cache
-    const LOCAL_STORAGE_KEY = 'afaps31_directory_db';
-    let chartInstances = {}; // To store chart objects for update
-    let map; // Leaflet map instance
-    let mapMarkers = L.layerGroup(); // Layer group for markers
-    
-    // --- Document Ready ---
-    $(document).ready(function() {
-      
-      // 1. Initialize Icons
-      lucide.createIcons();
-      initIcons(); // Replace placeholders
-
-      // 2. Initialize Views
-      showView('directory-view');
-
-      // 3. Load Data
-      loadDataFromCacheOrServer();
-
-      // 4. Navigation Event Handlers
-      setupNavigation();
-
-      // 5. Form & Data Event Handlers
-      setupFormHandlers();
-      setupDirectoryHandlers();
+    // แปลง array เป็น object
+    const data = values.map(row => {
+      let obj = {};
+      headers.forEach((header, index) => {
+        obj[header] = row[index];
+      });
+      return obj;
     });
 
-    // --- 1. Initialization ---
+    return data;
+  } catch (e) {
+    Logger.log(e);
+    throw new Error("ไม่สามารถโหลดข้อมูลได้: " + e.message);
+  }
+}
+
+/**
+ * บันทึกข้อมูล (ทั้งสร้างใหม่และอัปเดต)
+ * @param {object} formData - ข้อมูลจากฟอร์ม
+ * @param {object} fileBlob - ข้อมูลไฟล์ภาพ (data, mimeType, fileName)
+ */
+function saveData(formData, fileBlob) {
+  try {
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const uniqueIdCol = headers.indexOf("UniqueID") + 1;
+    const fileIdCol = headers.indexOf("FileID") + 1;
+    const imageFormulaCol = headers.indexOf("ImageFormula") + 1;
     
-    function initIcons() {
-      // Nav
-      $('#nav-directory .icon-wrapper').html(lucide.icons.Users.toSvg());
-      $('#nav-form .icon-wrapper').html(lucide.icons.UserPlus.toSvg());
-      $('#nav-dashboard .icon-wrapper').html(lucide.icons.LayoutDashboard.toSvg());
-      $('#nav-mobile-directory .icon-wrapper').html(lucide.icons.Users.toSvg());
-      $('#nav-mobile-form .icon-wrapper').html(lucide.icons.UserPlus.toSvg());
-      $('#nav-mobile-dashboard .icon-wrapper').html(lucide.icons.LayoutDashboard.toSvg());
+    let fileId = formData.FileID || "";
+    let imageUrl = formData.ImageFormula ? formData.ImageFormula.match(/="([^"]+)"/)[1] : ""; // ดึง URL จากสูตร
+
+    // 1. จัดการไฟล์ภาพ
+    if (fileBlob && fileBlob.data) {
+      const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+      const decodedData = Utilities.base64Decode(fileBlob.data);
+      const blob = Utilities.newBlob(decodedData, fileBlob.mimeType, fileBlob.fileName);
       
-      // Buttons
-      $('#print-table-btn .icon-wrapper').html(lucide.icons.Printer.toSvg());
-      $('#download-json-btn .icon-wrapper').html(lucide.icons.Download.toSvg());
-      $('#data-form button[type="submit"] .icon-wrapper').html(lucide.icons.Save.toSvg());
-      $('#clear-form-btn .icon-wrapper').html(lucide.icons.RotateCcw.toSvg());
-    }
-
-    function loadDataFromCacheOrServer() {
-      const cachedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (cachedData) {
-        DB = JSON.parse(cachedData);
-        renderDirectory(DB);
-        renderDashboard(DB);
-        $('#loading-spinner').hide();
-      }
-      
-      // Always fetch from server to get updates
-      $('#loading-spinner').show();
-      google.script.run
-        .withSuccessHandler(onDataLoaded)
-        .withFailureHandler(onApiError)
-        .loadData();
-    }
-
-    // --- 2. Navigation ---
-    
-    function setupNavigation() {
-      const navMapping = {
-        'nav-directory': 'directory-view',
-        'nav-form': 'form-view',
-        'nav-dashboard': 'dashboard-view',
-        'nav-mobile-directory': 'directory-view',
-        'nav-mobile-form': 'form-view',
-        'nav-mobile-dashboard': 'dashboard-view'
-      };
-
-      Object.keys(navMapping).forEach(navId => {
-        $(`#${navId}`).on('click', function(e) {
-          e.preventDefault();
-          const viewId = navMapping[navId];
-          showView(viewId);
-          
-          // Clear form if navigating to form view
-          if (viewId === 'form-view') {
-            resetForm();
-          }
-        });
-      });
-    }
-
-    function showView(viewIdToShow) {
-      // Hide all views
-      $('section[id$="-view"]').addClass('hidden');
-      // Show the target view
-      $(`#${viewIdToShow}`).removeClass('hidden');
-
-      // Update active state for nav links
-      $('.nav-link').removeClass('active');
-      $(`[id$="-${viewIdToShow.split('-')[0]}"]`).addClass('active');
-
-      // (Re)-Initialize dashboard if shown
-      if (viewIdToShow === 'dashboard-view') {
-        renderDashboard(DB);
-      }
-    }
-
-    // --- 3. Directory View Handlers ---
-    
-    function setupDirectoryHandlers() {
-      // Search
-      $('#search-input').on('keyup', function() {
-        const query = $(this).val().toLowerCase();
-        const filteredData = DB.filter(item => {
-          return (item.FirstName && item.FirstName.toLowerCase().includes(query)) ||
-                 (item.LastName && item.LastName.toLowerCase().includes(query)) ||
-                 (item.Corps && item.Corps.toLowerCase().includes(query)) ||
-                 (item.Affiliation && item.Affiliation.toLowerCase().includes(query));
-        });
-        renderDirectory(filteredData);
-      });
-
-      // Print Table
-      $('#print-table-btn').on('click', () => window.print());
-
-      // Download JSON
-      $('#download-json-btn').on('click', downloadJSON);
-
-      // Lightbox
-      $(document).on('click', '.img-lightbox', function() {
-        const src = $(this).attr('src');
-        const name = $(this).data('name');
-        $('#image-modal-src').attr('src', src);
-        $('#image-modal-title').text(name || 'รูปถ่าย');
-        new bootstrap.Modal($('#image-modal')).show();
-      });
-
-      // Edit Button
-      $(document).on('click', '.edit-btn', function() {
-        const id = $(this).data('id');
-        const record = DB.find(item => item.UniqueID === id);
-        if (record) {
-          loadFormForEdit(record);
+      // ถ้าเป็นการอัปเดต (มี FileID เดิม) ให้ลบไฟล์เก่าก่อน
+      if (formData.FileID) {
+        try {
+          DriveApp.getFileById(formData.FileID).setTrashed(true);
+        } catch (e) {
+          Logger.log("ไม่พบไฟล์เก่าที่จะลบ: " + e.message);
         }
-      });
-
-      // Delete Button
-      $(document).on('click', '.delete-btn', function() {
-        const id = $(this).data('id');
-        const record = DB.find(item => item.UniqueID === id);
-        const name = `${record.Rank || ''} ${record.FirstName || ''} ${record.LastName || ''}`;
-        
-        Swal.fire({
-          title: 'ยืนยันการลบ',
-          text: `คุณต้องการลบข้อมูลของ ${name} ใช่หรือไม่?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: 'ใช่, ลบเลย!',
-          cancelButtonText: 'ยกเลิก'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            Swal.fire({
-              title: 'กำลังลบข้อมูล...',
-              allowOutsideClick: false,
-              didOpen: () => Swal.showLoading()
-            });
-            google.script.run
-              .withSuccessHandler(onDataLoaded) // Reload all data after delete
-              .withFailureHandler(onApiError)
-              .deleteData(id);
-          }
-        });
-      });
-      
-      // Print Individual
-      $(document).on('click', '.print-individual-btn', function() {
-        const id = $(this).data('id');
-        const record = DB.find(item => item.UniqueID === id);
-        if (record) {
-          printIndividualForm(record);
-        }
-      });
-    }
-
-    // --- 4. Form View Handlers ---
-    
-    function setupFormHandlers() {
-      // Form Submit
-      $('#data-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        // Validation (Bootstrap 5 handles most via `required`)
-        if (!this.checkValidity()) {
-          e.stopPropagation();
-          $(this).addClass('was-validated');
-          Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน', 'error');
-          return;
-        }
-        $(this).removeClass('was-validated');
-
-        // Show loading
-        Swal.fire({
-          title: 'กำลังบันทึกข้อมูล...',
-          text: 'กรุณารอสักครู่',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
-
-        // 1. Get form data
-        let formData = {
-          UniqueID: $('#UniqueID').val(),
-          FileID: $('#FileID').val(),
-          ImageFormula: $('#ImageFormula').val(), // Pass existing image info
-          Affiliation: $('#Affiliation').val(),
-          Rank: $('#Rank').val(),
-          FirstName: $('#FirstName').val(),
-          LastName: $('#LastName').val(),
-          Position: $('#Position').val(),
-          Corps: $('#Corps').val(),
-          RetirementYear: $('#RetirementYear').val(),
-          Phone: $('#Phone').val(),
-          Email: $('#Email').val(),
-          MaritalStatus: $('#MaritalStatus').val(),
-          Children: $('#Children').val(),
-          Address: $('#Address').val(),
-          SubDistrict: $('#SubDistrict').val(),
-          District: $('#District').val(),
-          Province: $('#Province').val(),
-          PostalCode: $('#PostalCode').val(),
-        };
-
-        // 2. Handle image to Base64
-        const file = $('#photo')[0].files[0];
-        if (file) {
-          imageToBase64(file, function(base64String) {
-            formData.photoBase64 = base64String;
-            // 3. Send to server
-            google.script.run
-              .withSuccessHandler(onSaveSuccess)
-              .withFailureHandler(onApiError)
-              .saveData(formData);
-          });
-        } else {
-          formData.photoBase64 = null; // No new image
-          // 3. Send to server
-          google.script.run
-            .withSuccessHandler(onSaveSuccess)
-            .withFailureHandler(onApiError)
-            .saveData(formData);
-        }
-      });
-
-      // Clear Form
-      $('#clear-form-btn').on('click', resetForm);
-      
-      // Photo Preview
-      $('#photo').on('change', function() {
-        const file = this.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            $('#photo-preview').attr('src', e.target.result);
-          }
-          reader.readAsDataURL(file);
-        }
-      });
-
-      // Retirement countdown
-      $('#RetirementYear').on('input', function() {
-        const year = $(this).val();
-        if (year) {
-          $('#retirement-countdown').text(calculateRemainingTime(year));
-        } else {
-          $('#retirement-countdown').text('');
-        }
-      });
-    }
-
-    // --- 5. Data Rendering ---
-    
-    function renderDirectory(data) {
-      const $tableBody = $('#table-body');
-      const $cardsContainer = $('#data-display-cards');
-      
-      $tableBody.empty();
-      $cardsContainer.empty();
-
-      if (data.length === 0) {
-        const noDataHtml = `<td colspan="8" class="text-center text-gray-500 p-4">ไม่พบข้อมูล</td>`;
-        $tableBody.html(`<tr>${noDataHtml}</tr>`);
-        $cardsContainer.html(`<div class="col-span-full text-center text-gray-500 p-4">${noDataHtml}</div>`);
-        return;
       }
 
-      data.forEach(item => {
-        const name = `${item.Rank || ''} ${item.FirstName || ''} ${item.LastName || ''}`;
-        const imageUrl = extractImageUrl(item.ImageFormula) || 'https://via.placeholder.com/100.png?text=No+Image';
-
-        // Table Row
-        const tableRow = `
-          <tr data-id="${item.UniqueID}">
-            <td>
-              <img src="${imageUrl}" alt="${name}" 
-                   class="w-12 h-12 rounded-full object-cover cursor-pointer img-lightbox"
-                   data-name="${name}">
-            </td>
-            <td class="font-medium">${name}</td>
-            <td>${item.Position || '-'}</td>
-            <td>${item.Affiliation || '-'}</td>
-            <td>${item.Corps || '-'}</td>
-            <td>${item.RetirementYear || '-'}</td>
-            <td>
-              ${item.Phone ? `<div>${lucide.icons.Phone.toSvg({ class: 'w-4 h-4 inline-block' })} ${item.Phone}</div>` : ''}
-              ${item.Email ? `<div>${lucide.icons.Mail.toSvg({ class: 'w-4 h-4 inline-block' })} ${item.Email}</div>` : ''}
-            </td>
-            <td class="no-print">
-              <button class="btn btn-sm btn-outline-secondary p-1 print-individual-btn" data-id="${item.UniqueID}" title="พิมพ์ประวัติ">
-                ${lucide.icons.Printer.toSvg({ class: 'w-4 h-4' })}
-              </button>
-              <button class="btn btn-sm btn-outline-primary p-1 edit-btn" data-id="${item.UniqueID}" title="แก้ไข">
-                ${lucide.icons.Edit2.toSvg({ class: 'w-4 h-4' })}
-              </button>
-              <button class="btn btn-sm btn-outline-danger p-1 delete-btn" data-id="${item.UniqueID}" title="ลบ">
-                ${lucide.icons.Trash2.toSvg({ class: 'w-4 h-4' })}
-              </button>
-            </td>
-          </tr>
-        `;
-        $tableBody.append(tableRow);
-
-        // Mobile Card
-        const card = `
-          <div class="card-custom bg-white p-4" data-id="${item.UniqueID}">
-            <div class="flex gap-4">
-              <img src="${imageUrl}" alt="${name}" 
-                   class="w-20 h-20 rounded-lg object-cover cursor-pointer img-lightbox"
-                   data-name="${name}">
-              <div class="flex-1">
-                <h5 class="font-bold text-lg">${name}</h5>
-                <p class="text-sm text-gray-600">${item.Position || 'ไม่ระบุตำแหน่ง'}</p>
-                <span class="badge bg-blue-100 text-blue-800 me-1">${item.Affiliation || '-'}</span>
-                <span class="badge bg-green-100 text-green-800">${item.Corps || '-'}</span>
-              </div>
-            </div>
-            <hr class="my-3">
-            <div class="text-sm space-y-1">
-              <p><strong>เกษียณ:</strong> ${item.RetirementYear || '-'}</p>
-              ${item.Phone ? `<p><strong>โทร:</strong> ${item.Phone}</p>` : ''}
-              ${item.Email ? `<p><strong>อีเมล:</strong> ${item.Email}</p>` : ''}
-            </div>
-            <div class="mt-4 pt-3 border-t flex gap-2 no-print">
-              <button class="btn btn-sm btn-outline-secondary p-1 print-individual-btn" data-id="${item.UniqueID}">
-                ${lucide.icons.Printer.toSvg({ class: 'w-4 h-4' })} พิมพ์
-              </button>
-              <button class="btn btn-sm btn-outline-primary p-1 edit-btn" data-id="${item.UniqueID}">
-                ${lucide.icons.Edit2.toSvg({ class: 'w-4 h-4' })} แก้ไข
-              </button>
-              <button class="btn btn-sm btn-outline-danger p-1 delete-btn" data-id="${item.UniqueID}">
-                ${lucide.icons.Trash2.toSvg({ class: 'w-4 h-4' })} ลบ
-              </button>
-            </div>
-          </div>
-        `;
-        $cardsContainer.append(card);
-      });
+      // สร้างไฟล์ใหม่และแชร์
+      const file = folder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      fileId = file.getId();
+      imageUrl = `https://drive.google.com/uc?id=${fileId}`;
     }
 
-    // --- 6. Dashboard Rendering ---
-    
-    function renderDashboard(data) {
-      if (!data || data.length === 0) return;
+    // 2. เตรียมข้อมูลสำหรับลงชีต
+    formData.Timestamp = new Date();
+    formData.FileID = fileId;
+    formData.ImageFormula = imageUrl ? `=IMAGE("${imageUrl}")` : ""; // สร้างสูตร IMAGE
+
+    // 3. หว่านข้อมูลลงแถว (เรียงตามลำดับหัวข้อ)
+    const rowData = headers.map(header => formData[header] || "");
+
+    // 4. ตรวจสอบว่าเป็นการ "สร้างใหม่" หรือ "อัปเดต"
+    if (formData.UniqueID) {
+      // --- อัปเดต ---
+      const data = sheet.getDataRange().getValues();
+      const rowIndex = data.findIndex(row => row[uniqueIdCol - 1] == formData.UniqueID);
       
-      // Destroy old charts
-      Object.values(chartInstances).forEach(chart => chart.destroy());
-
-      // 1. Chart Affiliation (Pie)
-      const affiliationData = aggregateData(data, 'Affiliation');
-      chartInstances.affiliation = new Chart($('#chart-affiliation'), {
-        type: 'pie',
-        data: {
-          labels: Object.keys(affiliationData),
-          datasets: [{
-            data: Object.values(affiliationData),
-            backgroundColor: ['#3b82f6', '#10b981', '#ef4444', '#f97316', '#6b7280'],
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
-
-      // 2. Chart Rank (Doughnut)
-      const rankData = aggregateData(data, 'Rank');
-      chartInstances.rank = new Chart($('#chart-rank'), {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(rankData),
-          datasets: [{
-            data: Object.values(rankData),
-            backgroundColor: ['#8b5cf6', '#ec4899', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#6b7280'],
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
-
-      // 3. Chart Corps (Bar)
-      const corpsData = aggregateData(data, 'Corps');
-      chartInstances.corps = new Chart($('#chart-corps'), {
-        type: 'bar',
-        data: {
-          labels: Object.keys(corpsData),
-          datasets: [{
-            label: 'จำนวนคน',
-            data: Object.values(corpsData),
-            backgroundColor: '#10b981',
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
-
-      // 4. Chart Retirement (Top 5)
-      const retirementData = aggregateData(data, 'RetirementYear');
-      const sortedRetirement = Object.entries(retirementData)
-        .sort(([,a],[,b]) => b-a) // Sort by count descending
-        .slice(0, 5); // Get top 5
-      chartInstances.retirement = new Chart($('#chart-retirement'), {
-        type: 'bar',
-        data: {
-          labels: sortedRetirement.map(item => item[0]), // Year
-          datasets: [{
-            label: 'จำนวนคน',
-            data: sortedRetirement.map(item => item[1]), // Count
-            backgroundColor: '#3b82f6',
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
+      if (rowIndex !== -1) {
+        const sheetRowIndex = rowIndex + 1; // rowIndex_0 = แถว_1
+        sheet.getRange(sheetRowIndex, 1, 1, rowData.length).setValues([rowData]);
+        return JSON.stringify({ status: "success", message: "อัปเดตข้อมูลสำเร็จ", data: formData });
+      } else {
+        throw new Error("ไม่พบ UniqueID ที่ต้องการอัปเดต");
+      }
+    } else {
+      // --- สร้างใหม่ ---
+      formData.UniqueID = Utilities.getUuid(); // สร้าง ID ใหม่
+      rowData[uniqueIdCol - 1] = formData.UniqueID; // อัปเดต ID ใหม่ใน rowData
       
-      // 5. Map
-      initializeMap(data);
+      sheet.appendRow(rowData);
+      return JSON.stringify({ status: "success", message: "บันทึกข้อมูลใหม่สำเร็จ", data: formData });
     }
-    
-    function initializeMap(data) {
-      // Initialize map only once
-      if (!map) {
-        map = L.map('map').setView([13.7563, 100.5018], 6); // Center on Bangkok
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        mapMarkers.addTo(map);
+
+  } catch (e) {
+    Logger.log(e);
+    return JSON.stringify({ status: "error", message: e.message });
+  }
+}
+
+/**
+ * ลบข้อมูล
+ * @param {string} uniqueID - ID ของแถวที่จะลบ
+ */
+function deleteData(uniqueID) {
+  try {
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+    const data = sheet.getDataRange().getValues();
+    const headers = data.shift(); // เอาหัวข้อออก
+    const uniqueIdColIndex = headers.indexOf("UniqueID");
+    const fileIdColIndex = headers.indexOf("FileID");
+
+    if (uniqueIdColIndex === -1) {
+      throw new Error("ไม่พบคอลัมน์ UniqueID");
+    }
+
+    // หาแถวที่ตรงกับ ID
+    const rowIndex = data.findIndex(row => row[uniqueIdColIndex] == uniqueID);
+
+    if (rowIndex !== -1) {
+      const sheetRowIndex = rowIndex + 2; // +1 (index) +1 (header)
+      const fileId = data[rowIndex][fileIdColIndex];
+
+      // 1. ลบไฟล์ใน Drive (ถ้ามี)
+      if (fileId) {
+        try {
+          DriveApp.getFileById(fileId).setTrashed(true);
+        } catch (e) {
+          Logger.log("ไม่สามารถลบไฟล์: " + e.message);
+        }
       }
       
-      // Clear existing markers
-      mapMarkers.clearLayers();
+      // 2. ลบแถวใน Sheet
+      sheet.deleteRow(sheetRowIndex);
       
-      // Aggregate data by province
-      const provinceCounts = aggregateData(data, 'Province');
-      
-      // Geocode and add markers
-      // Note: This makes many API calls. For production, cache results.
-      Object.keys(provinceCounts).forEach(province => {
-        if (!province) return; // Skip empty
-        
-        const count = provinceCounts[province];
-        
-        // Use server-side geocoder to avoid CORS
-        google.script.run
-          .withSuccessHandler(function(coords) {
-            if (coords) {
-              L.marker([coords.lat, coords.lon])
-                .addTo(mapMarkers)
-                .bindPopup(`<b>${province}</b><br>${count} คน`);
-            }
-          })
-          .geocodeAddress(province);
-      });
+      return JSON.stringify({ status: "success", message: "ลบข้อมูลสำเร็จ" });
+    } else {
+      throw new Error("ไม่พบข้อมูลที่จะลบ");
     }
-
-    // --- 7. API Callbacks ---
-    
-    function onDataLoaded(data) {
-      DB = data;
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
-      renderDirectory(DB);
-      // Only render dashboard if it's the active view
-      if (!$('#dashboard-view').hasClass('hidden')) {
-        renderDashboard(DB);
-      }
-      $('#loading-spinner').hide();
-    }
-
-    function onSaveSuccess(updatedData) {
-      Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
-      DB = updatedData;
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedData));
-      renderDirectory(DB);
-      showView('directory-view'); // Switch to directory view
-      resetForm();
-    }
-
-    function onApiError(error) {
-      Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
-    }
-
-    // --- 8. Helper Functions ---
-    
-    function resetForm() {
-      $('#data-form')[0].reset();
-      $('#UniqueID').val('');
-      $('#FileID').val('');
-      $('#ImageFormula').val('');
-      $('#photo-preview').attr('src', 'https://via.placeholder.com/150.png?text=อัปโหลดรูป');
-      $('#form-title').text('บันทึกข้อมูลส่วนตัว');
-      $('#data-form').removeClass('was-validated');
-      $('#retirement-countdown').text('');
-    }
-
-    function loadFormForEdit(record) {
-      resetForm();
-      $('#form-title').text(`แก้ไขข้อมูล: ${record.FirstName} ${record.LastName}`);
-      
-      // Populate form
-      Object.keys(record).forEach(key => {
-        $(`#${key}`).val(record[key]);
-      });
-      
-      // Handle photo preview
-      const imageUrl = extractImageUrl(record.ImageFormula) || 'https://via.placeholder.com/150.png?text=No+Image';
-      $('#photo-preview').attr('src', imageUrl);
-
-      // Handle retirement countdown
-      if(record.RetirementYear) {
-         $('#retirement-countdown').text(calculateRemainingTime(record.RetirementYear));
-      }
-      
-      // Switch view
-      showView('form-view');
-    }
-
-    function imageToBase64(file, callback) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        callback(e.target.result);
-      };
-      reader.onerror = function(e) {
-        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถอ่านไฟล์รูปภาพได้', 'error');
-      };
-      reader.readAsDataURL(file);
-    }
-    
-    function extractImageUrl(formula) {
-      if (!formula) return null;
-      // Extracts URL from =IMAGE("URL", ...)
-      const match = formula.match(/=IMAGE\("([^"]+)"/);
-      return match ? match[1] : null;
-    }
-
-    function calculateRemainingTime(retirementYear) {
-      const retirementDate = new Date(`${retirementYear}-09-30`);
-      const now = new Date();
-      
-      if (retirementDate < now) {
-        return "เกษียณอายุแล้ว";
-      }
-
-      let diff = retirementDate.getTime() - now.getTime();
-      
-      let years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-      diff -= years * (1000 * 60 * 60 * 24 * 365.25);
-      
-      let months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30.44));
-      diff -= months * (1000 * 60 * 60 * 24 * 30.44);
-      
-      let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      
-      return `เหลือเวลา: ${years} ปี ${months} เดือน ${days} วัน`;
-    }
-    
-    function aggregateData(data, key) {
-      return data.reduce((acc, item) => {
-        const value = item[key] || "ไม่ระบุ";
-        acc[value] = (acc[value] || 0) + 1;
-        return acc;
-      }, {});
-    }
-    
-    function downloadJSON() {
-      const dataStr = JSON.stringify(DB, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      
-      const a = document.createElement('a');
-      a.href = dataUri;
-      a.download = 'afaps31_directory.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-    
-    function printIndividualForm(record) {
-      const imageUrl = extractImageUrl(record.ImageFormula) || 'https://via.placeholder.com/200.png?text=No+Image';
-      const name = `${record.Rank || ''} ${record.FirstName || ''} ${record.LastName || ''}`;
-      
-      const htmlContent = `
-        <html>
-        <head>
-          <title>ประวัติ: ${name}</title>
-          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-          <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            body { font-family: 'Sarabun', sans-serif; padding: 2rem; }
-            h1, h2, h3 { font-weight: 700; }
-            .section { border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem; }
-            .grid-item { display: flex; justify-content: space-between; padding-bottom: 0.25rem; }
-            .grid-item span:first-child { font-weight: 700; color: #374151; }
-            .grid-item span:last-child { color: #1f2937; }
-          </style>
-        </head>
-        <body class="bg-white">
-          <header class="flex items-center justify-between pb-4 border-b-2 border-gray-800">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Royal_Thai_Army_Logo.svg/1200px-Royal_Thai_Army_Logo.svg.png" alt="RTA Logo" style="width: 80px; height: auto;">
-            <h1 class="text-2xl font-bold text-center">แบบฟอร์มทะเบียนประวัติบุคคล</h1>
-            <div style="width: 80px;"></div> </header>
-          
-          <main class="mt-8">
-            <div class="flex flex-wrap md:flex-nowrap gap-8">
-              <div class="w-full md:w-1/3 text-center">
-                <img src="${imageUrl}" alt="${name}" class="w-48 h-auto mx-auto border-4 border-gray-300 rounded-lg shadow-lg">
-              </div>
-              
-              <div class="w-full md:w-2/3">
-                <h2 class="text-2xl font-bold">${name}</h2>
-                <p class="text-xl text-gray-700">${record.Position || 'ไม่ระบุตำแหน่ง'}</p>
-                
-                <h3 class="text-lg font-bold mt-6 section">ข้อมูลทั่วไป</h3>
-                <div class="grid grid-cols-2 gap-x-4 gap-y-1">
-                  <div class="grid-item"><span>สังกัด:</span> <span>${record.Affiliation || '-'}</span></div>
-                  <div class="grid-item"><span>เหล่า:</span> <span>${record.Corps || '-'}</span></div>
-                  <div class="grid-item"><span>ปีเกษียณ (พ.ศ.):</span> <span>${record.RetirementYear || '-'}</span></div>
-                  <div class="grid-item"><span>สถานภาพ:</span> <span>${record.MaritalStatus || '-'}</span></div>
-                  <div class="grid-item"><span>จำนวนบุตร:</span> <span>${record.Children || '-'}</span></div>
-                </div>
-
-                <h3 class="text-lg font-bold mt-6 section">ข้อมูลติดต่อ</h3>
-                <div class="grid grid-cols-1 gap-y-1">
-                  <div class="grid-item"><span>เบอร์โทร:</span> <span>${record.Phone || '-'}</span></div>
-                  <div class="grid-item"><span>อีเมล:</span> <span>${record.Email || '-'}</span></div>
-                </div>
-
-                <h3 class="text-lg font-bold mt-6 section">ที่อยู่ปัจจุบัน</h3>
-                <div class="grid grid-cols-1 gap-y-1">
-                  <div class="grid-item"><span>ที่อยู่:</span> <span>${record.Address || '-'}</span></div>
-                  <div class="grid-item"><span>ตำบล/แขวง:</span> <span>${record.SubDistrict || '-'}</span></div>
-                  <div class="grid-item"><span>อำเภอ/เขต:</span> <span>${record.District || '-'}</span></div>
-                  <div class="grid-item"><span>จังหวัด:</span> <span>${record.Province || '-'}</span></div>
-                  <div class="grid-item"><span>รหัสไปรษณีย์:</span> <span>${record.PostalCode || '-'}</span></div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </body>
-        </html>
-      `;
-      
-      const printWindow = window.open('', '_blank', 'width=800,height=600');
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      
-      // หน่วงเวลาเล็กน้อยเพื่อให้แน่ใจว่าโหลดฟอนต์และ CSS เสร็จ
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 1000);
-    }
-
-  </script>
-</body>
-</html>
+  } catch (e) {
+    Logger.log(e);
+    return JSON.stringify({ status: "error", message: e.message });
+  }
+}
