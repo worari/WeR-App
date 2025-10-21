@@ -1,566 +1,634 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-  <base target="_top">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
-  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.bootstrap5.css">
-
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  
-  <style>
-    /* ‼️ ธีมสี เขียว พาสเทล */
-    :root {
-      --bs-primary: #a8e6cf; /* เขียวพาสเทล (Mint) */
-      --bs-primary-rgb: 168, 230, 207;
-      /* --bs-secondary (ปุ่มล้างฟอร์ม) จะใช้สีเทา (#6c757d) ตามเดิม
-        --bs-danger (ปุ่มลบ, PDF) จะใช้สีแดง (#dc3545) ตามเดิม
-        --bs-success (ปุ่ม Excel) จะใช้สีเขียวเข้ม (#198754) ตามเดิม
-      */
-    }
-
-    body {
-      background-color: #fdfdfd; /* พื้นหลังสีขาวนวล */
-    }
-
-    /* ‼️ ปรับ Navbar เป็นสีเขียวพาสเทล */
-    .navbar {
-      background-color: var(--bs-primary) !important;
-    }
-
-    /* ‼️ ปรับปุ่มหลัก (Primary) */
-    .btn-primary {
-      background-color: var(--bs-primary);
-      border-color: var(--bs-primary);
-      color: #333; /* ‼️ เปลี่ยนสีตัวอักษรเป็นสีเข้ม */
-    }
-    .btn-primary:hover {
-      background-color: #97d4bc; /* เขียวเข้มขึ้นเล็กน้อย */
-      border-color: #97d4bc;
-      color: #333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดเก็บข้อมูลกำลังพล</title>
     
-    /* ‼️ ปรับปุ่มแก้ไข (Edit) เป็นสีเหลืองพาสเทล */
-    .btn-edit {
-      background-color: #fff59d; /* เหลืองพาสเทล */
-      border-color: #fff59d;
-      color: #555; /* ‼️ สีตัวอักษรเข้ม */
-    }
-    .btn-edit:hover {
-      background-color: #ffee58;
-      border-color: #ffee58;
-      color: #555;
-    }
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    /* ไอคอนในช่อง Input */
-    .input-group-text {
-        background-color: #e9ecef;
-    }
+    <!-- jQuery for easier DOM manipulation and event handling -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- DataTables for advanced table features -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.7/css/dataTables.tailwindcss.css">
+    <script src="https://cdn.datatables.net/2.0.7/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.7/js/dataTables.tailwindcss.js"></script>
+    
+    <!-- SweetAlert2 for beautiful alerts and notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    /* ‼️ ปรับสี Header ของ Card */
-    .card-header.bg-primary {
-        color: #333 !important; /* ‼️ สีตัวอักษรเข้ม */
-    }
-  </style>
+    <!-- SheetJS (xlsx) for Excel export functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+        }
+        .dataTables_wrapper .dataTables_filter input,
+        .dataTables_wrapper .dataTables_length select {
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem;
+            background-color: #f9fafb;
+        }
+        .form-select, .form-input {
+            border-radius: 0.5rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-secondary {
+            background-color: #4b5563;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #374151;
+        }
+        .btn-danger {
+            background-color: #dc2626;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
+        .btn-warning {
+             background-color: #f59e0b;
+             color: white;
+        }
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+        .btn-info {
+            background-color: #0ea5e9;
+            color: white;
+        }
+        .btn-info:hover {
+            background-color: #0284c7;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body class="bg-gray-100 p-4 md:p-8">
 
-  <nav class="navbar shadow-sm">
-    <div class="container-fluid">
-      <span class="navbar-brand mb-0 h1"><i class="bi bi-person-lines-fill"></i> ระบบฐานข้อมูลทำเนียบรุ่น</span>
-    </div>
-  </nav>
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">ระบบจัดเก็บข้อมูลกำลังพล</h1>
+            <p class="text-gray-600 mt-2">จัดการข้อมูลส่วนบุคคล ที่อยู่ และเอกสารสำคัญของบุคลากร</p>
+        </header>
 
-  <div class="container-fluid p-3 p-md-4">
-    
-    <div class="card shadow-sm mb-4">
-      <div class="card-header bg-primary text-dark">
-        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> ฟอร์มบันทึก/แก้ไขข้อมูล</h5>
-      </div>
-      <div class="card-body">
-        
-        <form id="dataForm" class="row g-3 needs-validation" novalidate>
-          
-          <input type="hidden" id="UniqueID" name="UniqueID">
-          <input type="hidden" id="FileID" name="FileID">
+        <form id="personnel-form" class="mb-8">
+            <!-- Form content will be grid for larger screens -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Personal Info Card -->
+                <div class="card lg:col-span-2">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">ข้อมูลส่วนบุคคล</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="rank" class="block text-sm font-medium text-gray-700">ยศ</label>
+                            <select id="rank" name="rank" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-select">
+                                <option>พล.อ.</option><option>พล.ท.</option><option>พล.ต.</option>
+                                <option>พ.อ.(พ.)</option><option>พ.อ.</option><option>พ.ท.</option><option>พ.ต.</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="fname" class="block text-sm font-medium text-gray-700">ชื่อ</label>
+                            <input type="text" id="fname" name="fname" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                        <div>
+                            <label for="lname" class="block text-sm font-medium text-gray-700">สกุล</label>
+                            <input type="text" id="lname" name="lname" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                        <div>
+                            <label for="nickname" class="block text-sm font-medium text-gray-700">ชื่อเล่น</label>
+                            <input type="text" id="nickname" name="nickname" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700">เบอร์โทร</label>
+                            <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="email" name="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                        <div>
+                            <label for="affiliation" class="block text-sm font-medium text-gray-700">สังกัด</label>
+                            <select id="affiliation" name="affiliation" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-select">
+                                <option>ทบ.</option><option>สป.</option><option>ทท.</option><option>สทป.</option><option value="อื่นๆ">อื่นๆ</option>
+                            </select>
+                        </div>
+                        <div id="affiliation_other_wrapper" class="hidden">
+                            <label for="affiliation_other" class="block text-sm font-medium text-gray-700">ระบุสังกัดอื่นๆ</label>
+                            <input type="text" id="affiliation_other" name="affiliation_other" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                         <div>
+                            <label for="position" class="block text-sm font-medium text-gray-700">ตำแหน่ง</label>
+                            <input type="text" id="position" name="position" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                        <div>
+                            <label for="corps" class="block text-sm font-medium text-gray-700">เหล่า</label>
+                            <select id="corps" name="corps" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-select">
+                                <option>ร.</option><option>ม.</option><option>ป.</option><option>ช.</option><option>ส.</option>
+                                <option>สพ.</option><option>ขส.</option><option>พธ.</option><option>สห.</option><option>ผท.</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="retirement_year" class="block text-sm font-medium text-gray-700">ปีเกษียณ (พ.ศ.)</label>
+                            <input type="number" id="retirement_year" name="retirement_year" min="2567" max="2650" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                        <div>
+                            <label for="marital_status" class="block text-sm font-medium text-gray-700">สถานภาพ</label>
+                            <select id="marital_status" name="marital_status" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-select">
+                                <option>โสด</option><option>สมรส</option><option>หย่าร้าง</option><option>หม้าย</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="children_count" class="block text-sm font-medium text-gray-700">จำนวนบุตร</label>
+                            <input type="number" id="children_count" name="children_count" min="0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                        </div>
+                    </div>
+                </div>
 
-          <div class="col-md-2">
-            <label for="Rank" class="form-label">ยศ</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                <select class="form-select" id="Rank" name="Rank" required>
-                  <option value="">-เลือก-</option>
-                  <option value="พล.อ.(พ.)">พล.อ.(พ.)</option>
-                  <option value="พล.อ.">พล.อ.</option>
-                  <option value="พล.ท.">พล.ท.</option>
-                  <option value="พล.ต.">พล.ต.</option>
-                  <option value="พ.อ.(พ.)">พ.อ.(พ.)</option>
-                  <option value="พ.อ.">พ.อ.</option>
-                  <option value="พ.ท.">พ.ท.</option>
-                  <option value="พ.ต.">พ.ต.</option>
-                  <option value="อื่นๆ">อื่นๆ</option>
-                </select>
-                <div class="invalid-feedback">กรุณาเลือกยศ</div>
+                <!-- Address & Photo Card -->
+                <div class="card lg:col-span-1">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">ข้อมูลที่อยู่และรูปภาพ</h2>
+                    <div>
+                        <label for="sub_district" class="block text-sm font-medium text-gray-700">ตำบล/แขวง</label>
+                        <input type="text" id="sub_district" name="sub_district" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                    </div>
+                    <div class="mt-4">
+                        <label for="district" class="block text-sm font-medium text-gray-700">อำเภอ/เขต</label>
+                        <input type="text" id="district" name="district" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                    </div>
+                    <div class="mt-4">
+                        <label for="province" class="block text-sm font-medium text-gray-700">จังหวัด</label>
+                        <input type="text" id="province" name="province" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                    </div>
+                    <div class="mt-4">
+                        <label for="zipcode" class="block text-sm font-medium text-gray-700">รหัสไปรษณีย์</label>
+                        <input type="text" id="zipcode" name="zipcode" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 form-input">
+                    </div>
+                    <div class="mt-4">
+                        <label for="profile_pic" class="block text-sm font-medium text-gray-700">รูปภาพโปรไฟล์</label>
+                        <input type="file" id="profile_pic" name="profile_pic" accept=".jpg, .jpeg, .png" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <img id="image_preview" src="https://placehold.co/200x200/e2e8f0/adb5bd?text=Preview" alt="Profile preview" class="mt-4 rounded-md w-48 h-48 object-cover mx-auto">
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="col-md-3">
-            <label for="FirstName" class="form-label">ชื่อ</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" id="FirstName" name="FirstName" required>
-                <div class="invalid-feedback">กรุณากรอกชื่อ</div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <label for="LastName" class="form-label">สกุล</label>
-             <div class="input-group">
-                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" id="LastName" name="LastName" required>
-                <div class="invalid-feedback">กรุณากรอกสกุล</div>
-             </div>
-          </div>
-          
-          <div class="col-md-4">
-            <label for="Phone" class="form-label">เบอร์โทร</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-phone"></i></span>
-                <input type="tel" class="form-control" id="Phone" name="Phone" pattern="[0-9]{10}" placeholder="0xxxxxxxxx">
-                <div class="invalid-feedback">กรุณากรอกเบอร์มือถือ 10 หลัก (ตัวเลขเท่านั้น)</div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <label for="Email" class="form-label">Email</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                <input type="email" class="form-control" id="Email" name="Email" placeholder="example@email.com">
-                <div class="invalid-feedback">กรุณากรอกอีเมลให้ถูกต้อง</div>
-            </div>
-          </div>
 
-          <div class="col-md-3">
-            <label for="Affiliation" class="form-label">สังกัด</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-building"></i></span>
-                <select class="form-select" id="Affiliation" name="Affiliation">
-                  <option value="">-เลือก-</option>
-                  <option value="ทบ.">ทบ.</option>
-                  <option value="สป.กห.">สป.กห.</option>
-                  <option value="ทท.">ทท.</option>
-                  <option value="สทป.">สทป.</option>
-                  <option value="อื่นๆ">อื่นๆ</option>
-                </select>
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-2 justify-center mt-6">
+                <input type="hidden" id="recordId" name="recordId">
+                <button type="submit" id="save-btn" class="btn btn-primary">บันทึกข้อมูล</button>
+                <button type="button" id="update-btn" class="btn btn-warning hidden">แก้ไขข้อมูล</button>
+                <button type="button" id="delete-btn" class="btn btn-danger hidden">ลบข้อมูล</button>
+                <button type="button" id="clear-btn" class="btn btn-secondary">ล้างฟอร์ม</button>
             </div>
-          </div>
-           <div class="col-md-3">
-            <label for="Position" class="form-label">ตำแหน่ง</label>
-            <input type="text" class="form-control" id="Position" name="Position">
-          </div>
-          <div class="col-md-2">
-            <label for="Corps" class="form-label">เหล่า</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-shield"></i></span>
-                <select class="form-select" id="Corps" name="Corps">
-                  <option value="">-เลือก-</option>
-                  <option value="ร.">ร.</option>
-                  <option value="ม.">ม.</option>
-                  <option value="ป.">ป.</option>
-                  <option value="ช.">ช.</option>
-                  <option value="ส.">ส.</option>
-                  <option value="สพ.">สพ.</option>
-                  <option value="ขส.">ขส.</option>
-                  <option value="พธ.">พธ.</option>
-                  <option value="สห.">สห.</option>
-                  <option value="ผท.">ผท.</option>
-                  <option value="พ.">พ.</option>
-                  <option value="อื่นๆ">อื่นๆ</option>
-                </select>
-            </div>
-          </div>
-          <div class="col-md-2">
-            <label for="RetirementYear" class="form-label">ปีเกษียณ</label>
-            <input type="number" class="form-control" id="RetirementYear" name="RetirementYear" placeholder="พ.ศ.">
-          </div>
-
-          <div class="col-md-3">
-            <label for="MaritalStatus" class="form-label">สถานภาพ</label>
-            <select class="form-select" id="MaritalStatus" name="MaritalStatus">
-              <option value="">-เลือก-</option>
-              <option value="โสด">โสด</option>
-              <option value="สมรส">สมรส</option>
-              <option value="หย่าร้าง">หย่าร้าง</option>
-              <option value="หม้าย">หม้าย</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="Children" class="form-label">จำนวนบุตร</label>
-            <input type="number" class="form-control" id="Children" name="Children" min="0">
-          </div>
-          
-          <div class="col-md-6">
-            <label for="Address" class="form-label">ที่อยู่</label>
-            <input type="text" class="form-control" id="Address" name="Address">
-          </div>
-          <div class="col-md-3">
-            <label for="SubDistrict" class="form-label">ตำบล/แขวง</label>
-            <input type="text" class="form-control" id="SubDistrict" name="SubDistrict">
-          </div>
-          <div class="col-md-3">
-            <label for="District" class="form-label">อำเภอ/เขต</label>
-            <input type="text" class="form-control" id="District" name="District">
-          </div>
-          <div class="col-md-3">
-            <label for="Province" class="form-label">จังหวัด</label>
-            <input type="text" class="form-control" id="Province" name="Province">
-          </div>
-          <div class="col-md-3">
-            <label for="PostalCode" class="form-label">รหัสไปรษณีย์</label>
-            <input type="text" class="form-control" id="PostalCode" name="PostalCode" pattern="[0-9]{5}">
-            <div class="invalid-feedback">กรุณากรอกรหัสไปรษณีย์ 5 หลัก (ตัวเลขเท่านั้น)</div>
-          </div>
-
-          <div class="col-md-6">
-            <label for="fileUpload" class="form-label">รูปภาพ (.jpg, .png)</label>
-            <input type="file" class="form-control" id="fileUpload" name="fileUpload" accept="image/jpeg, image/png">
-          </div>
-          <div class="col-md-6">
-            <div id="imagePreview" class="mt-2 border border-dashed rounded-3" style="width: 128px; height: 128px; display: flex; align-items: center; justify-content: center; color: #6c757d; background-color: #f8f9fa;">
-              ดูตัวอย่าง
-            </div>
-          </div>
-
-          <div class="col-12 text-end border-top pt-3 mt-3">
-            <button type="button" id="clearButton" class="btn btn-secondary me-2">
-              <i class="bi bi-x-lg"></i> ล้างฟอร์ม
-            </button>
-            <button type="submit" id="saveButton" class="btn btn-primary">
-              <span id="loadingSpinner" class="spinner-border spinner-border-sm me-1 d-none" role="status" aria-hidden="true"></span>
-              <i class="bi bi-save"></i> บันทึกข้อมูล
-            </button>
-          </div>
         </form>
-      </div>
-    </div>
 
-    <div class="card shadow-sm">
-      <div class="card-header bg-white">
-        <h5 class="mb-0"><i class="bi bi-table"></i> ตารางข้อมูล</h5>
-      </div>
-      <div class="card-body">
-        <div id="tableContainer" class="table-responsive">
-          <div class_ ="text-center p-5">
-            <p class="text-muted">กำลังโหลดข้อมูล...</p>
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+        <!-- Data Table Card -->
+        <div class="card no-print">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">รายชื่อบุคลากร</h2>
+            <div class="flex flex-wrap gap-2 mb-4">
+                 <button id="print-pdf-btn" class="btn btn-info text-sm">พิมพ์รายงาน PDF</button>
+                 <button id="export-excel-btn" class="btn btn-info text-sm bg-green-600 hover:bg-green-700">ส่งออกเป็น Excel</button>
+                 <button id="create-doc-btn" class="btn btn-info text-sm disabled:opacity-50" disabled>สร้างประวัติ (Google Doc)</button>
             </div>
-          </div>
+            <div class="overflow-x-auto">
+                <table id="personnel-table" class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3">ID</th>
+                            <th class="px-6 py-3">ยศ-ชื่อ-สกุล</th>
+                            <th class="px-6 py-3">สังกัด</th>
+                            <th class="px-6 py-3">ตำแหน่ง</th>
+                            <th class="px-6 py-3">เบอร์โทร</th>
+                            <th class="px-6 py-3">ปีเกษียณ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </div>
+        
+        <!-- Printable Area -->
+        <div id="print-area" class="hidden">
+             <h1 class="text-2xl font-bold text-center mb-6">รายงานข้อมูลกำลังพล</h1>
+             <div id="printable-content"></div>
+        </div>
+
     </div>
 
-  </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
-  <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
-  
-  <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.js"></script>
-  <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.bootstrap5.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-  <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
-
-
-  <script>
-    let fileData = null; // เก็บข้อมูลไฟล์ base64
-    let dataTableInstance = null; // เก็บ instance ของ DataTables
-    let allData = []; // เก็บข้อมูลทั้งหมดที่โหลดมา
-
-    // 1. --- โหลดข้อมูลเมื่อหน้าเว็บพร้อม ---
+    <script>
     $(document).ready(function() {
-      loadTableData();
-    });
+        // --- CONFIGURATION ---
+        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+        // If left empty, the app will use LocalStorage
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbyglNEYinciF3Z82yLJ0k80aYbqveBXbn3qBYkbLcX068OiIARmRgw1x0FFQj_51wLE/exec';
 
-    // 2. --- ฟังก์ชันโหลดข้อมูลและสร้างตาราง ---
-    function loadTableData() {
-      $("#tableContainer").html(`
-        <div class="text-center p-5">
-          <p class="text-muted">กำลังโหลดข้อมูล...</p>
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>`);
+        // --- GLOBAL VARIABLES ---
+        let personnelData = [];
+        let dataTable = null;
+        let selectedRowData = null;
 
-      google.script.run
-        .withSuccessHandler(createDataTable)
-        .withFailureHandler(showError)
-        .loadData();
-    }
-
-    // 3. --- ฟังก์ชันสร้าง DataTable ---
-    function createDataTable(data) {
-      
-      // ‼️‼️ FIX: กรองข้อมูลที่เป็น null หรือ undefined ออกไป ป้องกัน Error
-      const filteredData = data.filter(item => item);
-      
-      allData = filteredData; // ‼️ เก็บข้อมูลที่กรองแล้ว
-      
-      if (dataTableInstance) {
-        dataTableInstance.destroy();
-      }
-      
-      $("#tableContainer").html(`
-        <table id="directoryTable" class="table table-striped table-hover" style="width:100%">
-          <thead>
-            <tr>
-              <th>รูป</th>
-              <th>ยศ</th>
-              <th>ชื่อ</th>
-              <th>สกุล</th>
-              <th>สังกัด</th>
-              <th>เบอร์โทร</th>
-              <th>จัดการ</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      `);
-
-      dataTableInstance = new DataTable('#directoryTable', {
-        data: filteredData, // ‼️ ใช้ข้อมูลที่กรองแล้ว
-        pageLength: 10,
-        responsive: true,
-        columns: [
-          { 
-            data: 'FileID',
-            orderable: false,
-            searchable: false,
-            render: function(data, type, row) {
-              if (data) {
-                const imageUrl = `https://drive.google.com/uc?id=${data}`;
-                return `<img src="${imageUrl}" alt="รูป" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">`;
-              }
-              return '<div class="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 10px; color: #6c757d;">ไม่มีรูป</div>';
+        // --- INITIALIZATION ---
+        function initializeDataTable() {
+            if (dataTable) {
+                dataTable.destroy();
             }
-          },
-          { data: 'Rank' },
-          { data: 'FirstName' },
-          { data: 'LastName' },
-          { data: 'Affiliation' },
-          { data: 'Phone' },
-          {
-            data: null,
-            orderable: false,
-            searchable: false,
-            render: function(data, type, row) {
-              return `
-                <button class="btn btn-edit btn-sm me-1 edit-btn" data-id="${row.UniqueID}" title="แก้ไข">
-                  <i class="bi bi-pencil-fill"></i>
-                </button>
-                <button class="btn btn-danger btn-sm delete-btn" data-id="${row.UniqueID}" title="ลบ">
-                  <i class="bi bi-trash-fill"></i>
-                </button>
-              `;
+            dataTable = new DataTable('#personnel-table', {
+                responsive: true,
+                data: personnelData,
+                columns: [
+                    { data: 'id' },
+                    { 
+                        data: null, 
+                        render: (data, type, row) => `${row.rank || ''} ${row.fname || ''} ${row.lname || ''}`
+                    },
+                    { data: 'affiliation' },
+                    { data: 'position' },
+                    { data: 'phone' },
+                    { data: 'retirement_year' },
+                ],
+                columnDefs: [
+                    { "width": "5%", "targets": 0 }
+                ]
+            });
+
+            // Handle row selection
+            $('#personnel-table tbody').on('click', 'tr', function () {
+                if ($(this).hasClass('bg-blue-200')) {
+                    $(this).removeClass('bg-blue-200');
+                    clearForm();
+                    selectedRowData = null;
+                } else {
+                    dataTable.$('tr.bg-blue-200').removeClass('bg-blue-200');
+                    $(this).addClass('bg-blue-200');
+                    selectedRowData = dataTable.row(this).data();
+                    populateForm(selectedRowData);
+                }
+                 $('#create-doc-btn').prop('disabled', !selectedRowData || !GAS_URL);
+            });
+        }
+
+        // --- DATA HANDLING ---
+        function loadData() {
+            Swal.fire({
+                title: 'กำลังโหลดข้อมูล...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            if (GAS_URL) {
+                // Fetch from Google Sheets
+                fetch(`${GAS_URL}?action=getData`)
+                    .then(response => response.json())
+                    .then(data => {
+                        personnelData = data;
+                        initializeDataTable();
+                        Swal.close();
+                    })
+                    .catch(error => {
+                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้', 'error');
+                        console.error('Error loading data:', error);
+                    });
+            } else {
+                // Fetch from LocalStorage
+                const data = localStorage.getItem('personnelData');
+                personnelData = data ? JSON.parse(data) : [];
+                initializeDataTable();
+                Swal.close();
             }
-          }
-        ],
-        layout: {
-          topStart: 'buttons',
-          topEnd: 'search'
-        },
-        buttons: [
-            { extend: 'excelHtml5', text: '<i class="bi bi-file-earmark-excel"></i> Excel', className: 'btn-success btn-sm' },
-            { extend: 'pdfHtml5', text: '<i class="bi bi-file-earmark-pdf"></i> PDF', className: 'btn-danger btn-sm' }
-        ],
-        language: {
-            url: "//cdn.datatables.net/plug-ins/2.0.8/i18n/th.json"
-        }
-      });
-    }
-
-    // 4. --- จัดการการเลือกไฟล์ ---
-    $("#fileUpload").on("change", function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        if (file.type !== "image/jpeg" && file.type !== "image/png") {
-          showError({ message: "กรุณาเลือกไฟล์ .jpg หรือ .png เท่านั้น" });
-          $(this).val('');
-          return;
         }
         
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          $("#imagePreview").html(`<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" class="rounded-3">`);
-          const base64Data = e.target.result.split(';base64,')[1];
-          fileData = { data: base64Data, mimeType: file.type, fileName: file.name };
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+        function handleSave(formData) {
+            const action = formData.id ? 'update' : 'save';
+            const method = 'POST';
+            
+            Swal.fire({
+                title: 'กำลังบันทึกข้อมูล...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
 
-    // 5. --- จัดการการล้างฟอร์ม ---
-    $("#clearButton").on("click", function() {
-      $("#dataForm")[0].reset();
-      $("#UniqueID").val('');
-      $("#FileID").val('');
-      fileData = null;
-      $("#imagePreview").html("ดูตัวอย่าง");
-      $("#dataForm").removeClass('was-validated');
-      $('html, body').animate({ scrollTop: 0 }, 'fast');
-    });
+            if(GAS_URL) {
+                fetch(GAS_URL, {
+                    method: method,
+                    body: JSON.stringify({ action, data: formData }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(response => {
+                    if(response.success){
+                        Swal.fire('สำเร็จ!', 'บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
+                        loadData();
+                        clearForm();
+                    } else {
+                        throw new Error(response.message || 'Unknown error');
+                    }
+                })
+                .catch(err => {
+                    Swal.fire('เกิดข้อผิดพลาด!', `ไม่สามารถบันทึกข้อมูลได้: ${err.message}`, 'error');
+                });
+            } else {
+                 // LocalStorage Logic
+                if (action === 'save') {
+                    formData.id = personnelData.length > 0 ? Math.max(...personnelData.map(p => p.id)) + 1 : 1;
+                    personnelData.push(formData);
+                } else {
+                    const index = personnelData.findIndex(p => p.id == formData.id);
+                    if (index !== -1) {
+                        personnelData[index] = formData;
+                    }
+                }
+                localStorage.setItem('personnelData', JSON.stringify(personnelData));
+                Swal.fire('สำเร็จ!', 'บันทึกข้อมูลลง LocalStorage เรียบร้อยแล้ว', 'success');
+                loadData();
+                clearForm();
+            }
+        }
 
-    // 6. --- จัดการการบันทึกข้อมูล (Submit Form) ---
-    $("#dataForm").on("submit", function(e) {
-      e.preventDefault();
-      
-      const form = this;
-      if (!form.checkValidity()) {
-        e.stopPropagation();
-        form.classList.add('was-validated');
-        
-        Swal.fire({
-          icon: 'error',
-          title: 'ข้อมูลไม่สมบูรณ์',
-          text: 'กรุณากรอกข้อมูลในช่องที่จำเป็น และตรวจสอบความถูกต้อง (เช่น เบอร์โทร, รหัสไปรษณีย์)'
+        function handleDelete(id) {
+            Swal.fire({
+                title: 'คุณแน่ใจหรือไม่?',
+                text: "คุณจะไม่สามารถกู้คืนข้อมูลนี้ได้!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ลบเลย!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (GAS_URL) {
+                        fetch(GAS_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({ action: 'delete', data: { id: id } }),
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                        .then(res => res.json())
+                        .then(response => {
+                             if(response.success){
+                                Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบเรียบร้อยแล้ว', 'success');
+                                loadData();
+                                clearForm();
+                             } else { throw new Error(response.message); }
+                        })
+                        .catch(err => Swal.fire('เกิดข้อผิดพลาด!', `ไม่สามารถลบข้อมูลได้: ${err.message}`, 'error'));
+                    } else {
+                        personnelData = personnelData.filter(p => p.id != id);
+                        localStorage.setItem('personnelData', JSON.stringify(personnelData));
+                        Swal.fire('ลบแล้ว!', 'ข้อมูลถูกลบเรียบร้อยแล้ว', 'success');
+                        loadData();
+                        clearForm();
+                    }
+                }
+            });
+        }
+
+
+        // --- FORM HANDLING ---
+        $('#personnel-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            // Validation
+            const requiredFields = ['fname', 'lname', 'phone', 'affiliation'];
+            let isValid = true;
+            for (const field of requiredFields) {
+                const input = $(`#${field}`);
+                if (!input.val()) {
+                    isValid = false;
+                    input.addClass('border-red-500');
+                } else {
+                    input.removeClass('border-red-500');
+                }
+            }
+            if (!isValid) {
+                 Swal.fire('ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลในช่องที่มีเครื่องหมาย *', 'warning');
+                 return;
+            }
+
+            const formData = {};
+            const formArray = $(this).serializeArray();
+            $.each(formArray, function(i, field) {
+                formData[field.name] = field.value;
+            });
+            formData.id = $('#recordId').val(); // Ensure ID is included for updates
+            
+            const file = $('#profile_pic')[0].files[0];
+            if(file){
+                 const reader = new FileReader();
+                 reader.onloadend = function() {
+                    formData.profile_pic_base64 = reader.result;
+                    formData.profile_pic_filename = file.name;
+                    handleSave(formData);
+                 }
+                 reader.readAsDataURL(file);
+            } else {
+                 formData.profile_pic_base64 = selectedRowData ? selectedRowData.profile_pic_url : null;
+                 formData.profile_pic_filename = '';
+                 handleSave(formData);
+            }
         });
-        return;
-      }
-      form.classList.remove('was-validated');
 
-      setLoading(true);
+        function populateForm(data) {
+            $('#recordId').val(data.id);
+            $('#rank').val(data.rank);
+            $('#fname').val(data.fname);
+            $('#lname').val(data.lname);
+            $('#nickname').val(data.nickname);
+            $('#phone').val(data.phone);
+            $('#email').val(data.email);
+            $('#position').val(data.position);
+            $('#corps').val(data.corps);
+            $('#retirement_year').val(data.retirement_year);
+            $('#marital_status').val(data.marital_status);
+            $('#children_count').val(data.children_count);
+            $('#sub_district').val(data.sub_district);
+            $('#district').val(data.district);
+            $('#province').val(data.province);
+            $('#zipcode').val(data.zipcode);
+            
+            // Handle affiliation
+            const affiliations = $('#affiliation option').map((i, el) => el.value).get();
+            if (affiliations.includes(data.affiliation)) {
+                 $('#affiliation').val(data.affiliation);
+                 $('#affiliation_other_wrapper').addClass('hidden');
+            } else {
+                 $('#affiliation').val('อื่นๆ');
+                 $('#affiliation_other_wrapper').removeClass('hidden');
+                 $('#affiliation_other').val(data.affiliation);
+            }
+            
+            $('#image_preview').attr('src', data.profile_pic_url || 'https://placehold.co/200x200/e2e8f0/adb5bd?text=No+Image');
 
-      const formData = $(this).serializeArray().reduce(function(obj, item) {
-        obj[item.name] = item.value;
-        return obj;
-      }, {});
+            // Toggle buttons
+            $('#save-btn').addClass('hidden');
+            $('#update-btn, #delete-btn').removeClass('hidden');
+        }
 
-      google.script.run
-        .withSuccessHandler(onSaveSuccess)
-        .withFailureHandler(onSaveFailure)
-        .saveData(formData, fileData);
-    });
-
-    function onSaveSuccess(response) {
-      setLoading(false);
-      const res = JSON.parse(response);
-
-      if (res.status === "success") {
-        Swal.fire({
-          icon: 'success',
-          title: res.message,
-          showConfirmButton: false,
-          timer: 1500
+        function clearForm() {
+            $('#personnel-form')[0].reset();
+            $('#recordId').val('');
+            $('#image_preview').attr('src', 'https://placehold.co/200x200/e2e8f0/adb5bd?text=Preview');
+            $('#save-btn').removeClass('hidden');
+            $('#update-btn, #delete-btn').addClass('hidden');
+            $('#affiliation_other_wrapper').addClass('hidden');
+            if (dataTable) dataTable.$('tr.bg-blue-200').removeClass('bg-blue-200');
+            selectedRowData = null;
+            $('#create-doc-btn').prop('disabled', true);
+        }
+        
+        // --- EVENT LISTENERS ---
+        $('#affiliation').on('change', function() {
+            if ($(this).val() === 'อื่นๆ') {
+                $('#affiliation_other_wrapper').removeClass('hidden');
+            } else {
+                $('#affiliation_other_wrapper').addClass('hidden');
+            }
         });
-        $("#clearButton").click();
-        loadTableData();
-      } else {
-        onSaveFailure({ message: res.message });
-      }
-    }
 
-    function onSaveFailure(error) {
-      setLoading(false);
-      showError(error);
-    }
+        $('#profile_pic').on('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                 if(file.size > 5 * 1024 * 1024) { // 5 MB limit
+                     Swal.fire('ขนาดไฟล์ใหญ่เกินไป', 'กรุณาเลือกรูปภาพขนาดไม่เกิน 5MB', 'warning');
+                     $(this).val(''); // Clear the input
+                     return;
+                 }
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    $('#image_preview').attr('src', event.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
 
-    // 7. --- จัดการปุ่ม "แก้ไข" ---
-    $("#tableContainer").on("click", ".edit-btn", function() {
-      const id = $(this).data("id");
-      const record = allData.find(item => item.UniqueID == id);
+        $('#clear-btn').on('click', clearForm);
 
-      if (record) {
-        $("#dataForm").removeClass('was-validated');
-        for (const key in record) {
-          $(`#${key}`).val(record[key]);
-        }
+        $('#update-btn').on('click', () => $('#personnel-form').trigger('submit'));
+
+        $('#delete-btn').on('click', function() {
+            const id = $('#recordId').val();
+            if(id) handleDelete(id);
+        });
+
+        // --- EXPORT & PRINT ---
+        $('#export-excel-btn').on('click', function() {
+            if (personnelData.length === 0) {
+                Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลสำหรับส่งออก', 'info');
+                return;
+            }
+            const worksheet = XLSX.utils.json_to_sheet(personnelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "PersonnelData");
+            XLSX.writeFile(workbook, "Personnel_Data.xlsx");
+        });
+
+        $('#print-pdf-btn').on('click', function() {
+            let content = 'ยังไม่มีข้อมูล';
+            if (personnelData.length > 0) {
+                 content = '<table class="w-full border-collapse border border-slate-500">';
+                 content += '<thead class="bg-slate-200"><tr>';
+                 const headers = ["ID", "ยศ", "ชื่อ", "สกุล", "สังกัด", "ตำแหน่ง", "เบอร์โทร"];
+                 headers.forEach(h => content += `<th class="border border-slate-600 p-2">${h}</th>`);
+                 content += '</tr></thead><tbody>';
+
+                 personnelData.forEach(p => {
+                     content += '<tr>';
+                     content += `<td class="border border-slate-700 p-2 text-center">${p.id}</td>`;
+                     content += `<td class="border border-slate-700 p-2">${p.rank}</td>`;
+                     content += `<td class="border border-slate-700 p-2">${p.fname}</td>`;
+                     content += `<td class="border border-slate-700 p-2">${p.lname}</td>`;
+                     content += `<td class="border border-slate-700 p-2">${p.affiliation}</td>`;
+                     content += `<td class="border border-slate-700 p-2">${p.position}</td>`;
+                     content += `<td class="border border-slate-700 p-2">${p.phone}</td>`;
+                     content += '</tr>';
+                 });
+
+                 content += '</tbody></table>';
+            }
+            $('#printable-content').html(content);
+            window.print();
+        });
         
-        if (record.FileID) {
-          const imageUrl = `https://drive.google.com/uc?id=${record.FileID}`;
-          $("#imagePreview").html(`<img src="${imageUrl}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" class="rounded-3">`);
-        } else {
-          $("#imagePreview").html("ดูตัวอย่าง");
-        }
-        
-        $("#fileUpload").val('');
-        fileData = null;
-        $('html, body').animate({ scrollTop: 0 }, 'fast');
-      }
+        $('#create-doc-btn').on('click', function() {
+             if (!selectedRowData) {
+                Swal.fire('เกิดข้อผิดพลาด', 'กรุณาเลือกบุคลากรจากตารางก่อน', 'warning');
+                return;
+             }
+             Swal.fire({
+                title: 'กำลังสร้างเอกสาร Google Doc...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+             
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'createDoc', data: selectedRowData }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(response => {
+                if(response.success){
+                    Swal.fire({
+                        title: 'สร้างเอกสารสำเร็จ!',
+                        html: `คุณสามารถเปิดเอกสารได้ที่: <a href="${response.url}" target="_blank" class="text-blue-600 hover:underline">คลิกที่นี่</a>`,
+                        icon: 'success'
+                    });
+                } else {
+                    throw new Error(response.message || 'Unknown error');
+                }
+            })
+            .catch(err => {
+                Swal.fire('เกิดข้อผิดพลาด!', `ไม่สามารถสร้างเอกสารได้: ${err.message}`, 'error');
+            });
+        });
+
+        // --- INITIAL LOAD ---
+        loadData();
     });
-
-    // 8. --- จัดการปุ่ม "ลบ" ---
-    $("#tableContainer").on("click", ".delete-btn", function() {
-      const id = $(this).data("id");
-      
-      Swal.fire({
-        title: 'คุณแน่ใจหรือไม่?',
-        text: "คุณต้องการลบข้อมูลนี้ (รวมถึงไฟล์ภาพ) ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'ใช่, ลบเลย!',
-        cancelButtonText: 'ยกเลิก'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          Swal.fire({
-            title: 'กำลังลบ...',
-            text: 'กรุณารอสักครู่',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading() }
-          });
-          
-          google.script.run
-            .withSuccessHandler(onDeleteSuccess)
-            .withFailureHandler(showError)
-            .deleteData(id);
-        }
-      });
-    });
-
-    function onDeleteSuccess(response) {
-      const res = JSON.parse(response);
-      if (res.status === "success") {
-        Swal.fire(
-          'ลบสำเร็จ!',
-          'ข้อมูลของคุณถูกลบแล้ว',
-          'success'
-        );
-        loadTableData();
-      } else {
-        showError({ message: res.message });
-      }
-    }
-
-    // 9. --- ฟังก์ชันช่วยเหลือ ---
-    function setLoading(isLoading) {
-      const saveButton = $("#saveButton");
-      const spinner = $("#loadingSpinner");
-      if (isLoading) {
-        saveButton.prop("disabled", true);
-        spinner.removeClass("d-none");
-      } else {
-        saveButton.prop("disabled", false);
-        spinner.addClass("d-none");
-      }
-    }
-    
-    function showError(error) {
-      setLoading(false);
-      Swal.fire({
-        icon: 'error',
-        title: 'เกิดข้อผิดพลาด',
-        text: error.message || error
-      });
-    }
-  </script>
-
+    </script>
 </body>
 </html>
